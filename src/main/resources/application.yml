@@ -1,3 +1,4 @@
+
 telegram:
   bot:
     token: 8448498911:AAGeKR1k0qMAAd1ggmnjb5bFfOUEUDOEoJA
@@ -21,3 +22,6 @@ logging:
 jwt:
   secret: "l7JYtEQW9BqfBMLpIQrqmxWPHZm7cZ4EjQp7U7N8A9O9vC5rDfsVtVJWr1+EylkD"
   expiration: 86400000 # 1 day
+
+server:
+  address: 192.168.1.102

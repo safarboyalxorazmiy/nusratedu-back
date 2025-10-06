@@ -35,7 +35,7 @@ WITH replication = {{'class': 'NetworkTopologyStrategy', '{CASSANDRA_DC}': 1 }};
 # Connect directly into keyspace (better than USE)
 session = cluster.connect(CASSANDRA_KEYSPACE)
 
-# Ensure table exists
+# Ensure table exists - matching Java schema exactly
 session.execute("""
 CREATE TABLE IF NOT EXISTS users (
     telegramid text PRIMARY KEY,
@@ -46,7 +46,10 @@ CREATE TABLE IF NOT EXISTS users (
     logincode text,
     codeexpiresat timestamp,
     codeused boolean,
-    createdat timestamp
+    createdat timestamp,
+    jwt_token text,
+    blocked boolean,
+    role text
 );
 """)
 
@@ -99,12 +102,11 @@ async def login(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 INSERT INTO users (
                     telegramid, username, firstname, lastname,
                     logincode, codeexpiresat, codeused, createdat,
-                    jwt_token, blocked, role
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, toTimestamp(now()), %s, %s, %s)
-                IF NOT EXISTS;
+                    jwt_token, blocked, role, photourl
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, toTimestamp(now()), %s, %s, %s, %s);
                 """,
                 (telegram_id, username, firstname, lastname,
-                 code, expires, codeused, token, blocked, "USER")
+                 code, expires, codeused, token, blocked, "USER", None)
             )
             print(f"[DB] Inserted new user {telegram_id} with code {code}")
 
