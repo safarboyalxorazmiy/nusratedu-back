@@ -1,0 +1,23 @@
+telegram:
+  bot:
+    token: 8448498911:AAGeKR1k0qMAAd1ggmnjb5bFfOUEUDOEoJA
+    username: nusratedu_bot
+
+spring:
+  cassandra:
+    contact-points:
+      - 127.0.0.1
+    port: 9042
+    local-datacenter: datacenter1   # EXACT value from system.local
+    keyspace-name: nusrat
+    schema-action: create_if_not_exists
+  data:
+    cassandra:
+      consistency-level: LOCAL_QUORUM
+logging:
+  level:
+    org.springframework.data.cassandra.core.cql: DEBUG
+
+jwt:
+  secret: "l7JYtEQW9BqfBMLpIQrqmxWPHZm7cZ4EjQp7U7N8A9O9vC5rDfsVtVJWr1+EylkD"
+  expiration: 86400000 # 1 day
