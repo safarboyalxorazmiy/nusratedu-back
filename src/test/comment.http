@@ -1,0 +1,13 @@
+### Comment create
+POST http://192.168.1.103:8080/api/v1/comment/create
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI2NDI2OTI3MzY2IiwiaWF0IjoxNzYwODE2ODQ0LCJleHAiOjE3NjA5MDMyNDR9.QaHer2T742rJSVBSnzSQ21UHedNx8OA1CLbAvssHcIU
+
+{
+  "content": "Alloh ro'zi bo'lsin, va nihoyat tushundim",
+  "lesson_id": "067eef40-ad01-11f0-aac9-1749fc76caba"
+}
+
+### Lesson get all comments
+GET http://192.168.1.103:8080/api/v1/comment/get?lessonId=067eef40-ad01-11f0-aac9-1749fc76caba
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI2NDI2OTI3MzY2IiwiaWF0IjoxNzYwODE2ODQ0LCJleHAiOjE3NjA5MDMyNDR9.QaHer2T742rJSVBSnzSQ21UHedNx8OA1CLbAvssHcIU

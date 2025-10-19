@@ -25,8 +25,12 @@ public class SecurityConfig {
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchanges -> exchanges
                         .pathMatchers("/api/v1/auth/**").permitAll()
-                        .pathMatchers("/api/v1/admin/**").hasRole("ADMIN") // 👈 only admin users
-                        .pathMatchers("/api/v1/user/**").hasAnyRole("USER", "ADMIN") // 👈 normal users
+                        .pathMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                        .pathMatchers("/api/v1/user/**").hasAnyRole("USER", "ADMIN")
+                        .pathMatchers("/api/v1/course/create").hasAnyRole("ADMIN")
+                        .pathMatchers("/api/v1/comment/**").hasAnyRole("USER", "ADMIN")
+                        .pathMatchers("/api/v1/lesson/create").hasAnyRole("ADMIN")
+                        .pathMatchers("/api/v1/section/create").hasAnyRole("ADMIN")
                         .anyExchange().authenticated()
                 )
                 .authenticationManager(authManager)

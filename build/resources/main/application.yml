@@ -24,4 +24,4 @@ jwt:
   expiration: 86400000 # 1 day
 
 server:
-  address: 192.168.1.102
+  address: 192.168.1.103

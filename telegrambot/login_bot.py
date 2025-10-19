@@ -59,11 +59,8 @@ print("✅ Connected to Cassandra and ready!")
 # 3️⃣ Telegram command handlers
 # ---------------------------------------------------------------------
 async def login(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Generate and store a 6-digit login code."""
+    """Generate and store a unique 6-digit login code."""
     user = update.effective_user
-    code = f"{random.randint(0, 999999):06d}"
-    expires = datetime.now(timezone.utc) + timedelta(minutes=5)
-
     telegram_id = str(user.id)
     username = user.username or "unknown"
     firstname = user.first_name or "NoName"
@@ -71,9 +68,39 @@ async def login(update: Update, context: ContextTypes.DEFAULT_TYPE):
     codeused = False
     blocked = False
     token = None
+    expires = datetime.now(timezone.utc) + timedelta(minutes=5)
+
+    # 🔁 Generate a unique code
+    max_attempts = 10
+    for _ in range(max_attempts):
+        code = f"{random.randint(0, 999999):06d}"
+        try:
+            # First, check if code exists
+            result = session.execute(
+                "SELECT telegramid, codeused, codeexpiresat FROM users WHERE logincode = %s;",
+                (code,)
+            ).one()
+
+            # If no result found, code is unique and available
+            if not result:
+                break  # ✅ Unique code found
+
+            # If code exists but is expired or used, we can still use it
+            is_expired = result.codeexpiresat <= datetime.now(timezone.utc)
+            is_used = result.codeused
+
+            if is_expired or is_used:
+                break  # ✅ Can reuse this code (expired/used codes can be recycled)
+
+        except Exception as e:
+            print("❌ DB error during code uniqueness check:", e)
+            await update.message.reply_text("⚠️ Database error. Try again later.")
+            return
+    else:
+        await update.message.reply_text("⚠️ Failed to generate unique code. Try again.")
+        return
 
     try:
-        # 1️⃣ Check if user exists
         existing = session.execute(
             "SELECT blocked FROM users WHERE telegramid = %s;",
             (telegram_id,)
@@ -85,7 +112,6 @@ async def login(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 print(f"[DB] Blocked user {telegram_id} tried to log in.")
                 return
             else:
-                # 2️⃣ Update login code only (do not reinsert user)
                 session.execute(
                     """
                     UPDATE users
@@ -96,7 +122,6 @@ async def login(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 )
                 print(f"[DB] Updated existing user {telegram_id} with new code {code}")
         else:
-            # 3️⃣ Insert new user if not exists
             session.execute(
                 """
                 INSERT INTO users (
@@ -119,7 +144,6 @@ async def login(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"✅ Your login code: `{code}`\n_Valid for 5 minutes._",
         parse_mode="Markdown"
     )
-
 
 async def verify(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Validate the code and mark it as used."""
