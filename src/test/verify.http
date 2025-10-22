@@ -1,7 +1,16 @@
-# Login pincode verifying
+#### Login pincode verifying
 POST http://192.168.1.103:8080/api/v1/auth/verify
 Content-Type: application/json
 
 {
-  "code": "945206"
+  "code": "624055"
+}
+
+### admin login verifying
+POST http://192.168.1.103:8080/api/v1/auth/admin/verify
+Content-Type: application/json
+
+{
+  "username": "manxorazmiyim",
+  "code": "105566"
 }
