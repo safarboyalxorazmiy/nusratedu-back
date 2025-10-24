@@ -9,11 +9,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Mono;
 import uz.nusratedu.payment.application.dto.PaymentMakeRequestDTO;
 import uz.nusratedu.payment.application.dto.PaymentMakeResponseDTO;
 import uz.nusratedu.payment.application.dto.PaymentVerifyRequestDTO;
 import uz.nusratedu.payment.domain.service.IPaymentSevice;
 import uz.nusratedu.user.User;
+
+import java.nio.file.attribute.UserPrincipal;
 
 @RestController
 @RequestMapping("/api/v1/payment")
@@ -23,24 +26,27 @@ public class PaymentController {
     private final IPaymentSevice paymentService;
 
     @PostMapping("/make")
-    public ResponseEntity<PaymentMakeResponseDTO> make(
-            @RequestBody PaymentMakeRequestDTO dto
+    public ResponseEntity<Mono<PaymentMakeResponseDTO>> make(
+            @RequestBody PaymentMakeRequestDTO dto,
+            Authentication authentication
     ) {
+        var user = (User) authentication.getPrincipal();
+
         log.info("/payment/make, Request: {}", dto);
 
-        return ResponseEntity.ok(paymentService.make(dto, getUser().getTelegramId()));
+        return ResponseEntity.ok(paymentService.make(dto, user.getTelegramId()));
     }
 
     @PostMapping("/verify")
-    public ResponseEntity<Void> make(
-            @RequestBody PaymentVerifyRequestDTO paymentVerifyRequestDTO
+    public ResponseEntity<Mono<Void>> make(
+            @RequestBody PaymentVerifyRequestDTO dto,
+            Authentication authentication
     ) {
-        paymentService.verify(paymentVerifyRequestDTO, getUser().getTelegramId());
-        return ResponseEntity.status(201).build();
-    }
+        var user = (User) authentication.getPrincipal();
 
-    private User getUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return (User) authentication.getPrincipal();
+        log.info("/payment/verify, Request: {}", dto);
+
+        paymentService.verify(dto, user.getTelegramId());
+        return ResponseEntity.status(201).build();
     }
 }

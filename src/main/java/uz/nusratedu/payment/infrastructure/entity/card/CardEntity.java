@@ -15,6 +15,7 @@ import java.util.UUID;
 public class CardEntity {
 
     @PrimaryKey
+    @Builder.Default
     private UUID id = Uuids.timeBased();
 
     private Long orderId;
