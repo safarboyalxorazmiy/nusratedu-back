@@ -9,12 +9,18 @@ import uz.nusratedu.course.application.dto.CourseResponse;
 import uz.nusratedu.course.application.mapper.CourseMapper;
 import uz.nusratedu.course.infrastructure.entity.CourseEntity;
 import uz.nusratedu.course.infrastructure.repository.CourseRepository;
+import uz.nusratedu.payment.infrastructure.entity.CoursePurchaseHistoryEntity;
+import uz.nusratedu.payment.infrastructure.repository.CoursePurchaseHistoryRepository;
+import uz.nusratedu.user.User;
+
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class CourseService implements ICourseService {
     private final CourseRepository courseRepository;
     private final CourseMapper courseMapper;
+    private final CoursePurchaseHistoryRepository coursePurchaseHistoryRepository;
 
     @Override
     public Mono<CourseResponse> create(CourseCreateRequest dto) {
@@ -25,8 +31,30 @@ public class CourseService implements ICourseService {
     }
 
     @Override
-    public Flux<CourseResponse> getAllCourses() {
-        return courseRepository.findAll().map(courseMapper::toResponse);
+    public Flux<CourseResponse> getAllCourses(User user) {
+        return courseRepository.findAll()
+                .flatMap(course ->
+                        coursePurchaseHistoryRepository
+                                .existsByUserIdAndCourseId((user.getTelegramId()), course.getId().toString())
+                                .map(purchased -> {
+                                    CourseResponse resp = courseMapper.toResponse(course);
+                                    resp.setPurchased(purchased);
+                                    return resp;
+                                })
+                );
+    }
+
+    @Override
+    public Flux<CourseResponse> getPurchasedCourses(User user) {
+        return coursePurchaseHistoryRepository.findByUserId(user.getTelegramId())
+                .map(coursePurchases -> UUID.fromString(coursePurchases.getCourseId()))
+                .flatMap(courseId -> courseRepository.findById(courseId)
+                        .map(course -> {
+                            CourseResponse response = courseMapper.toResponse(course);
+                            response.setPurchased(true);
+                            return response;
+                        })
+                );
     }
 
 

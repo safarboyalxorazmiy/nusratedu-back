@@ -38,7 +38,7 @@ public class PaymentController {
     }
 
     @PostMapping("/verify")
-    public ResponseEntity<Mono<Void>> make(
+    public Mono<ResponseEntity<Void>> make(
             @RequestBody PaymentVerifyRequestDTO dto,
             Authentication authentication
     ) {
@@ -46,7 +46,12 @@ public class PaymentController {
 
         log.info("/payment/verify, Request: {}", dto);
 
-        paymentService.verify(dto, user.getTelegramId());
-        return ResponseEntity.status(201).build();
+        return paymentService.verify(dto, user.getTelegramId())
+                .then(Mono.just(ResponseEntity.status(201).<Void>build()))
+                .onErrorResume(e -> {
+                    log.error("Payment verify failed: {}", e.getMessage());
+                    return Mono.just(ResponseEntity.badRequest().build());
+                });
     }
+
 }

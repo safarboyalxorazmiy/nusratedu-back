@@ -1,5 +1,6 @@
 package uz.nusratedu.payment.infrastructure.entity;
 
+import com.datastax.oss.driver.api.core.uuid.Uuids;
 import lombok.Data;
 import org.springframework.data.cassandra.core.cql.Ordering;
 import org.springframework.data.cassandra.core.cql.PrimaryKeyType;
@@ -12,11 +13,12 @@ import java.util.UUID;
 @Table("course_purchase_history")
 public class CoursePurchaseHistoryEntity {
 
-    @PrimaryKeyColumn(name = "user_id", type = PrimaryKeyType.PARTITIONED)
-    private String userId;
 
     @PrimaryKeyColumn(name = "purchase_id", type = PrimaryKeyType.CLUSTERED, ordering = Ordering.DESCENDING)
-    private UUID purchaseId;
+    private UUID purchaseId = Uuids.timeBased();
+
+    @PrimaryKeyColumn(name = "user_id", type = PrimaryKeyType.PARTITIONED)
+    private String userId;
 
     @Column("course_id")
     private String courseId;

@@ -9,6 +9,7 @@ import uz.nusratedu.payment.application.dto.PaymentMakeRequestDTO;
 import uz.nusratedu.payment.application.dto.PaymentMakeResponseDTO;
 import uz.nusratedu.payment.application.dto.PaymentVerifyRequestDTO;
 import uz.nusratedu.payment.infrastructure.entity.CoursePurchaseHistoryEntity;
+import uz.nusratedu.payment.infrastructure.entity.card.CardEntity;
 import uz.nusratedu.payment.infrastructure.repository.CoursePurchaseHistoryRepository;
 import uz.nusratedu.util.payme.InvalidVerificationCodeException;
 import uz.nusratedu.util.payme.PaymeService;
@@ -46,24 +47,41 @@ public class PaymentService implements IPaymentSevice {
 
     @Override
     public Mono<Void> verify(PaymentVerifyRequestDTO dto, String telegramId) {
-        if ("Mashallah".equals(dto.getToken())) {
-            return cardService.getCardByTokenAndUserId(dto.getToken(), telegramId)
-                    .flatMap(card -> "9999".equals(dto.getCode())
-                            ? Mono.error(new InvalidVerificationCodeException("Code is wrong"))
-                            : saveHistory(dto.getCourseId(), telegramId));
-        }
-
         return cardService.getCardByTokenAndUserId(dto.getToken(), telegramId)
-                .flatMap(card -> Mono.fromCallable(() -> paymeService.verifyCard(dto.getToken(), dto.getCode(), 123, authToken))
-                        .subscribeOn(Schedulers.boundedElastic())
-                        .flatMap(isValid -> Boolean.FALSE.equals(isValid)
-                                ? Mono.error(new InvalidVerificationCodeException("Code is wrong"))
-                                : Mono.fromCallable(() -> {
-                                    String productId = paymeService.createReceipt(500000, 12333, "Наименование услуги или товара", 250000, 2, "02001001005034001", 12, "1397132");
-                                    paymeService.payReceipt(productId, dto.getToken());
-                                    return null;
-                                }).subscribeOn(Schedulers.boundedElastic())
-                                .then(saveHistory(dto.getCourseId(), telegramId))));
+                .switchIfEmpty(Mono.error(new IllegalStateException("Card not found")))
+                .flatMap(card -> {
+                    if ("Mashallah".equals(dto.getToken())) {
+                        if (!"9999".equals(dto.getCode())) {
+                            return Mono.error(new InvalidVerificationCodeException("Code is wrong"));
+                        }
+                        return saveHistory(dto.getCourseId(), telegramId);
+                    }
+
+                    return Mono.fromCallable(() ->
+                                    paymeService.verifyCard(dto.getToken(), dto.getCode(), 123, authToken))
+                            .subscribeOn(Schedulers.boundedElastic())
+                            .flatMap(isValid -> {
+                                if (Boolean.FALSE.equals(isValid)) {
+                                    return Mono.error(new InvalidVerificationCodeException("Code is wrong"));
+                                }
+                                return Mono.fromCallable(() -> {
+                                            String productId = paymeService.createReceipt(
+                                                    500_000,
+                                                    12333,
+                                                    "Наименование услуги или товара",
+                                                    250_000,
+                                                    2,
+                                                    "02001001005034001",
+                                                    12,
+                                                    "1397132"
+                                            );
+                                            paymeService.payReceipt(productId, dto.getToken());
+                                            return productId;
+                                        })
+                                        .subscribeOn(Schedulers.boundedElastic())
+                                        .then(saveHistory(dto.getCourseId(), telegramId));
+                            });
+                });
     }
 
     private Mono<Void> saveHistory(String courseId, String telegramId) {

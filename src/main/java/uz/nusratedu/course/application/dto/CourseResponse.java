@@ -22,4 +22,7 @@ public class CourseResponse {
 
     @JsonProperty("course_field")
     private String courseField;
+
+    @JsonProperty
+    private Boolean purchased;
 }

@@ -5,11 +5,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.cassandra.core.ReactiveCassandraTemplate;
 import org.springframework.data.cassandra.core.cql.ReactiveCqlOperations;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 import uz.nusratedu.payment.infrastructure.entity.card.CardEntity;
 import uz.nusratedu.payment.infrastructure.repository.CardRepository;
 import uz.nusratedu.util.payme.CardNotFoundException;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 
@@ -94,11 +97,13 @@ public class CardService {
     }
 
     public Mono<CardEntity> getCardByTokenAndUserId(String token, String userId) {
-        return Mono.fromCallable(() -> cardRepository.findByToken(token))
-                .flatMap(optionalCard -> optionalCard
-                        .filter(card -> card.getUserId().equals(userId))
-                        .map(Mono::just)
-                        .orElseGet(() -> Mono.error(new CardNotFoundException("Invalid token")))
-                );
+        return cardRepository.findByToken(token)
+                .filter(card -> userId.equals(card.getUserId()))
+                .sort((card1, card2) -> {
+                    LocalDateTime date1 = card1.getCreatedAt() != null ? card1.getCreatedAt() : LocalDateTime.MIN;
+                    LocalDateTime date2 = card2.getCreatedAt() != null ? card2.getCreatedAt() : LocalDateTime.MIN;
+                    return date2.compareTo(date1); // DESC order
+                })
+                .next();
     }
 }
