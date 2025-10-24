@@ -1,0 +1,21 @@
+### 1. Make Payment Request
+POST http://192.168.1.103:8080/api/v1/payment/make
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI2NDI2OTI3MzY2IiwiaWF0IjoxNzYxMTMzNTk4LCJleHAiOjE3NjEyMTk5OTh9.OEap7HOqvMKj_lw_9Opp_serYEzpEbKsWnAJcf91Epg
+
+{
+  "number": "5614688715057575",
+  "expire": "1030",
+  "course_id": "COURSE123"
+}
+
+### 2. Verify Payment Request
+POST http://192.168.1.103:8080/api/v1/payment/verify
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI2NDI2OTI3MzY2IiwiaWF0IjoxNzYxMTMzNTk4LCJleHAiOjE3NjEyMTk5OTh9.OEap7HOqvMKj_lw_9Opp_serYEzpEbKsWnAJcf91Epg
+
+{
+  "token": "sample-token-123",
+  "code": "123456",
+  "course_id": "COURSE123"
+}

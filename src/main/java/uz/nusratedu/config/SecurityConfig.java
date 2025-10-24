@@ -6,13 +6,15 @@ import org.springframework.security.config.annotation.web.reactive.EnableWebFlux
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import uz.nusratedu.config.jwt.JwtAuthenticationManager;
+import org.springframework.security.web.server.context.ServerSecurityContextRepository;
+import org.springframework.web.cors.reactive.CorsConfigurationSource;
 
 @Configuration
 @EnableWebFluxSecurity
 public class SecurityConfig {
 
     private final JwtAuthenticationManager authManager;
-    private final SecurityContextRepository contextRepo;
+    private final ServerSecurityContextRepository contextRepo;
 
     public SecurityConfig(JwtAuthenticationManager authManager, SecurityContextRepository contextRepo) {
         this.authManager = authManager;
@@ -20,8 +22,9 @@ public class SecurityConfig {
     }
 
     @Bean
-    SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
+    public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http, CorsConfigurationSource corsConfigSource) {
         return http
+                .cors(cors -> cors.configurationSource(corsConfigSource))
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchanges -> exchanges
                         .pathMatchers("/api/v1/auth/**").permitAll()
