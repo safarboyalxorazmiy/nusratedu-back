@@ -1,0 +1,27 @@
+@token = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI2NDI2OTI3MzY2IiwiaWF0IjoxNzYxMzI1NTk3LCJleHAiOjE3NjE0MTE5OTd9.ihvImp1K7T1bxWyggf3K88nUSLDd4ZqIsI8uG8J_xyE
+
+### Lesson create
+POST http://192.168.1.103:8080/api/v1/lesson/create
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI2NDI2OTI3MzY2IiwiaWF0IjoxNzYxMTMzNTk4LCJleHAiOjE3NjEyMTk5OTh9.OEap7HOqvMKj_lw_9Opp_serYEzpEbKsWnAJcf91Epg
+
+{
+  "title": "New lesson",
+  "vimeo_url": "https://player.vimeo.com/video/1128506430",
+  "pdf_url": "https://admission.usat.uz",
+  "section_id": "7d646ed0-acfe-11f0-adb5-43e6001eea00"
+}
+
+### Lesson get all
+GET http://192.168.1.103:8080/api/v1/lesson/get?sectionId=e8bf2a30-af42-11f0-ac0d-e512280affc3
+Authorization: Bearer {{token}}
+
+### ✅ Complete a lesson
+POST http://192.168.1.103:8080/api/v1/lessons/complete/2960ace0-af88-11f0-b7eb-5dc465cb9df6
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+### 📘 Get all completed lessons
+GET http://192.168.1.103:8080/api/v1/lessons/get/completed
+Authorization: Bearer {{token}}
+Accept: application/json
