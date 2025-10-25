@@ -38,15 +38,15 @@ public class LessonController {
             @PathVariable UUID lessonId,
             Authentication authentication
     ) {
-        var user = authentication.getPrincipal();
-        return ResponseEntity.status(201).body(service.completeLesson(lessonId, (User) user));
+        var user = (User) authentication.getPrincipal();
+        return ResponseEntity.status(201).body(service.completeLesson(lessonId, user));
     }
 
     @GetMapping("/get/completed")
     public ResponseEntity<Flux<LessonResponse>> getCompletedLessons(
             Authentication authentication
     ) {
-        var user = authentication.getPrincipal();
-        return ResponseEntity.ok(service.getCompletedLessons((User) user));
+        var user = (User) authentication.getPrincipal();
+        return ResponseEntity.ok(service.getCompletedLessons(user));
     }
 }

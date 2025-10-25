@@ -18,6 +18,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class CommentEntity {
     @PrimaryKey
+    @Builder.Default
     private UUID id = Uuids.timeBased();
 
     @Column("content")

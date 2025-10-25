@@ -18,6 +18,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class LessonEntity {
     @PrimaryKey
+    @Builder.Default
     private UUID id = Uuids.timeBased();
 
     @Column("title")

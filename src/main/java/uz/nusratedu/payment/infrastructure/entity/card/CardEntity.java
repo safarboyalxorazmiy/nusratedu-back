@@ -23,6 +23,8 @@ public class CardEntity {
     private Long orderId;
     private String number;
     private String expire;
+
+    @Builder.Default
     private String token = "";
     private String userId;
 

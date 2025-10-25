@@ -9,10 +9,9 @@ import com.datastax.oss.driver.api.core.uuid.Uuids;
 
 @Mapper(componentModel = "spring")
 public interface CourseMapper {
-    CourseResponse toDomain(CourseEntity entity);
-
     @Mapping(target = "id", expression = "java(com.datastax.oss.driver.api.core.uuid.Uuids.timeBased())")
     CourseEntity toEntity(CourseCreateRequest dto);
 
+    @Mapping(target = "purchased", ignore = true)
     CourseResponse toResponse(CourseEntity entity);
 }

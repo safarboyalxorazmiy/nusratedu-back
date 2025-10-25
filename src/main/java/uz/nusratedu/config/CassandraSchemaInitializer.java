@@ -37,12 +37,5 @@ public class CassandraSchemaInitializer implements ApplicationRunner {
                 .doOnSuccess(result -> System.out.println("✅ section_course_id_idx ready."))
                 .doOnError(err -> System.err.println("⚠️ Error creating index for sections: " + err.getMessage()))
                 .subscribe();
-
-        // completed_lesson by user_id
-        cqlTemplate.execute("CREATE INDEX IF NOT EXISTS completed_lesson_user_id_idx ON completed_lesson (user_id);")
-                .doOnSuccess(result -> System.out.println("✅ completed_lesson_user_id_idx ready."))
-                .doOnError(err -> System.err.println("⚠️ Error creating index for completed_lesson: " + err.getMessage()))
-                .subscribe();
-
     }
 }

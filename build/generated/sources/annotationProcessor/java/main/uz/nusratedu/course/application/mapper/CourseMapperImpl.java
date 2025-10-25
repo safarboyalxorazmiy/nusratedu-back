@@ -8,28 +8,11 @@ import uz.nusratedu.course.infrastructure.entity.CourseEntity;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-10-25T02:50:47+0500",
+    date = "2025-10-26T01:08:25+0500",
     comments = "version: 1.6.2, compiler: IncrementalProcessingEnvironment from gradle-language-java-8.14.3.jar, environment: Java 21.0.9-ea (Debian)"
 )
 @Component
 public class CourseMapperImpl implements CourseMapper {
-
-    @Override
-    public CourseResponse toDomain(CourseEntity entity) {
-        if ( entity == null ) {
-            return null;
-        }
-
-        CourseResponse courseResponse = new CourseResponse();
-
-        courseResponse.setId( entity.getId() );
-        courseResponse.setCourseName( entity.getCourseName() );
-        courseResponse.setCourseDescription( entity.getCourseDescription() );
-        courseResponse.setCourseStatus( entity.getCourseStatus() );
-        courseResponse.setCourseField( entity.getCourseField() );
-
-        return courseResponse;
-    }
 
     @Override
     public CourseEntity toEntity(CourseCreateRequest dto) {

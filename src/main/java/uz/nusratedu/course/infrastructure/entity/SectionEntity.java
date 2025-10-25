@@ -18,6 +18,7 @@ import org.springframework.data.cassandra.core.mapping.Table;
 @AllArgsConstructor
 public class SectionEntity {
     @PrimaryKey
+    @Builder.Default
     private UUID id = Uuids.timeBased();
 
     private String title;
