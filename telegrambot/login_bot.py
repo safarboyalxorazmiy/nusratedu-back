@@ -6,7 +6,7 @@ import random
 from datetime import datetime, timedelta, timezone
 from cassandra.cluster import Cluster
 from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
+from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes, MessageHandler, filters
 from dotenv import load_dotenv
 
 # ---------------------------------------------------------------------
@@ -200,6 +200,16 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"🔑 Yangi kod olish uchun /login ni bosing"
     )
 
+async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.message.from_user
+    full_name = f"{user.first_name or ''} {user.last_name or ''}".strip()
+
+    await update.message.reply_text(
+        f"Assalomu aleykum Va Rohmatulloh {full_name}👋\n"
+        f"@nusratedu'ning rasmiy botiga xush kelibsiz\n\n"
+        f"🔑 Yangi kod olish uchun /login ni bosing"
+    )
+
 # ---------------------------------------------------------------------
 # 4️⃣ Entry point
 # ---------------------------------------------------------------------
@@ -213,7 +223,7 @@ def main():
     app.add_handler(CommandHandler("verify", verify))
     app.add_handler(CommandHandler("start", start))
 
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, start))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
     print("🤖 Bot is running...")
     app.run_polling()
