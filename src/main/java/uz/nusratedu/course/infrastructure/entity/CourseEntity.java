@@ -35,4 +35,11 @@ public class CourseEntity {
 
     @Column("course_attach_url")
     private String courseAttachUrl;
+
+    @Column("teacher")
+    private String teacher;
+
+    @Column("course_description_lg")
+    private String courseDescriptionLg;
+
 }

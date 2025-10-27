@@ -18,6 +18,9 @@ public class CourseResponse {
     @JsonProperty("course_description")
     private String courseDescription;
 
+    @JsonProperty("course_description_lg")
+    private String courseDescriptionLg;
+
     @JsonProperty("course_status")
     private String courseStatus;
 
@@ -32,4 +35,7 @@ public class CourseResponse {
 
     @JsonProperty("course_attach_url")
     private String courseAttachUrl;
+
+    @JsonProperty("teacher")
+    private String teacher;
 }
