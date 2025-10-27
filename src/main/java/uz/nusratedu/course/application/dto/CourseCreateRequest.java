@@ -18,4 +18,7 @@ public class CourseCreateRequest {
 
     @JsonProperty("course_field")
     private String courseField;
+
+    @JsonProperty("course_attach_url")
+    private String courseAttachUrl = "";
 }

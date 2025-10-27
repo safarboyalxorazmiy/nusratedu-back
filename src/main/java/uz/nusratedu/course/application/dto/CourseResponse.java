@@ -25,4 +25,7 @@ public class CourseResponse {
 
     @JsonProperty
     private Boolean purchased;
+
+    @JsonProperty("course_attach_url")
+    private String courseAttachUrl = "";
 }

@@ -32,4 +32,7 @@ public class CourseEntity {
 
     @Column("course_field")
     private String courseField; // Qur'on
+
+    @Column("course_attach_url")
+    private String courseAttachUrl;
 }

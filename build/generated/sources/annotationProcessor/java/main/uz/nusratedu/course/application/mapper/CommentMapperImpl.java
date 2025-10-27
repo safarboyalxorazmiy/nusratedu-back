@@ -8,7 +8,7 @@ import uz.nusratedu.course.infrastructure.entity.CommentEntity;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-10-26T01:08:25+0500",
+    date = "2025-10-27T22:50:47+0500",
     comments = "version: 1.6.2, compiler: IncrementalProcessingEnvironment from gradle-language-java-8.14.3.jar, environment: Java 21.0.9-ea (Debian)"
 )
 @Component
