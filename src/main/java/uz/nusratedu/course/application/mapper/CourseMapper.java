@@ -13,5 +13,6 @@ public interface CourseMapper {
     CourseEntity toEntity(CourseCreateRequest dto);
 
     @Mapping(target = "purchased", ignore = true)
+    @Mapping(target = "purchasedAt", ignore = true)
     CourseResponse toResponse(CourseEntity entity);
 }

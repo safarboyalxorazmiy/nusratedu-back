@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @Data
@@ -26,6 +27,9 @@ public class CourseResponse {
     @JsonProperty
     private Boolean purchased;
 
+    @JsonProperty("purchased_at")
+    private Instant purchasedAt;
+
     @JsonProperty("course_attach_url")
-    private String courseAttachUrl = "";
+    private String courseAttachUrl;
 }

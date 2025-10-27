@@ -13,7 +13,7 @@ import java.util.UUID;
 @Repository
 public interface CoursePurchaseHistoryRepository extends ReactiveCassandraRepository<CoursePurchaseHistoryEntity, UUID> {
     @AllowFiltering
-    Mono<Boolean> existsByUserIdAndCourseId(String userId, String courseId);
+    Mono<CoursePurchaseHistoryEntity> findByUserIdAndCourseId(String userId, String courseId);
 
     Flux<CoursePurchaseHistoryEntity> findByUserId(String telegramId);
 }

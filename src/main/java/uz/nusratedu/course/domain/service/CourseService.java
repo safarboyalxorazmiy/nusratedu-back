@@ -35,10 +35,11 @@ public class CourseService implements ICourseService {
         return courseRepository.findAll()
                 .flatMap(course ->
                         coursePurchaseHistoryRepository
-                                .existsByUserIdAndCourseId((user.getTelegramId()), course.getId().toString())
-                                .map(purchased -> {
+                                .findByUserIdAndCourseId((user.getTelegramId()), course.getId().toString())
+                                .map(coursePurchase -> {
                                     CourseResponse resp = courseMapper.toResponse(course);
-                                    resp.setPurchased(purchased);
+                                    resp.setPurchased(true);
+                                    resp.setPurchasedAt(coursePurchase.getPurchasedAt());
                                     return resp;
                                 })
                 );
@@ -47,15 +48,18 @@ public class CourseService implements ICourseService {
     @Override
     public Flux<CourseResponse> getPurchasedCourses(User user) {
         return coursePurchaseHistoryRepository.findByUserId(user.getTelegramId())
-                .map(coursePurchases -> UUID.fromString(coursePurchases.getCourseId()))
-                .flatMap(courseId -> courseRepository.findById(courseId)
-                        .map(course -> {
-                            CourseResponse response = courseMapper.toResponse(course);
-                            response.setPurchased(true);
-                            return response;
-                        })
-                );
+                .flatMap(coursePurchase -> {
+                    UUID courseId = UUID.fromString(coursePurchase.getCourseId());
+                    return courseRepository.findById(courseId)
+                            .map(course -> {
+                                CourseResponse response = courseMapper.toResponse(course);
+                                response.setPurchased(true);
+                                response.setPurchasedAt(coursePurchase.getPurchasedAt());
+                                return response;
+                            });
+                });
     }
+
 
 
 }
