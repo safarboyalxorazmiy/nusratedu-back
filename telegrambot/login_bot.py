@@ -190,6 +190,16 @@ async def verify(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text("✅ Verified successfully!")
 
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.message.from_user
+    full_name = f"{user.first_name or ''} {user.last_name or ''}".strip()
+
+    await update.message.reply_text(
+        f"Assalomu aleykum Va Rohmatulloh {full_name}👋\n"
+        f"@nusratedu'ning rasmiy botiga xush kelibsiz\n\n"
+        f"🔑 Yangi kod olish uchun /login ni bosing"
+    )
+
 # ---------------------------------------------------------------------
 # 4️⃣ Entry point
 # ---------------------------------------------------------------------
@@ -201,6 +211,9 @@ def main():
     app = ApplicationBuilder().token(TOKEN).build()
     app.add_handler(CommandHandler("login", login))
     app.add_handler(CommandHandler("verify", verify))
+    app.add_handler(CommandHandler("start", start))
+
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, start))
 
     print("🤖 Bot is running...")
     app.run_polling()

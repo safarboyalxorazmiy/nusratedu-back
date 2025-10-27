@@ -8,7 +8,7 @@ import uz.nusratedu.course.infrastructure.entity.CourseEntity;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-10-27T23:19:02+0500",
+    date = "2025-10-28T01:18:11+0500",
     comments = "version: 1.6.2, compiler: IncrementalProcessingEnvironment from gradle-language-java-8.14.3.jar, environment: Java 21.0.9-ea (Debian)"
 )
 @Component
@@ -27,6 +27,8 @@ public class CourseMapperImpl implements CourseMapper {
         courseEntity.courseStatus( dto.getCourseStatus() );
         courseEntity.courseField( dto.getCourseField() );
         courseEntity.courseAttachUrl( dto.getCourseAttachUrl() );
+        courseEntity.teacher( dto.getTeacher() );
+        courseEntity.courseDescriptionLg( dto.getCourseDescriptionLg() );
 
         courseEntity.id( com.datastax.oss.driver.api.core.uuid.Uuids.timeBased() );
 
@@ -44,9 +46,11 @@ public class CourseMapperImpl implements CourseMapper {
         courseResponse.setId( entity.getId() );
         courseResponse.setCourseName( entity.getCourseName() );
         courseResponse.setCourseDescription( entity.getCourseDescription() );
+        courseResponse.setCourseDescriptionLg( entity.getCourseDescriptionLg() );
         courseResponse.setCourseStatus( entity.getCourseStatus() );
         courseResponse.setCourseField( entity.getCourseField() );
         courseResponse.setCourseAttachUrl( entity.getCourseAttachUrl() );
+        courseResponse.setTeacher( entity.getTeacher() );
 
         return courseResponse;
     }
