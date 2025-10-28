@@ -25,4 +25,6 @@ public class SectionEntity {
 
     @Column("course_id")
     private UUID courseId;
+
+    private Integer order;
 }

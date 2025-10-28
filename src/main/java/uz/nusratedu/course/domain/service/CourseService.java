@@ -35,15 +35,24 @@ public class CourseService implements ICourseService {
         return courseRepository.findAll()
                 .flatMap(course ->
                         coursePurchaseHistoryRepository
-                                .findByUserIdAndCourseId((user.getTelegramId()), course.getId().toString())
+                                .findByUserIdAndCourseId(user.getTelegramId(), course.getId().toString())
                                 .map(coursePurchase -> {
                                     CourseResponse resp = courseMapper.toResponse(course);
                                     resp.setPurchased(true);
                                     resp.setPurchasedAt(coursePurchase.getPurchasedAt());
                                     return resp;
                                 })
+                                .defaultIfEmpty(courseMapper.toResponse(course))
+                                .map(resp -> {
+                                    if (resp.getPurchased() == null) {
+                                        resp.setPurchased(false);
+                                        resp.setPurchasedAt(null);
+                                    }
+                                    return resp;
+                                })
                 );
     }
+
 
     @Override
     public Flux<CourseResponse> getPurchasedCourses(User user) {

@@ -16,4 +16,6 @@ public class SectionResponse {
 
     @JsonProperty("course_id")
     private UUID courseId;
+
+    private Integer order;
 }

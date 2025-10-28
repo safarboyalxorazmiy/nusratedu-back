@@ -14,4 +14,6 @@ public class SectionCreateRequest {
 
     @JsonProperty("course_id")
     private UUID courseId;
+
+    private Integer order;
 }
