@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.cassandra.core.mapping.*;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @Table("completed_lesson")
@@ -25,4 +26,7 @@ public class CompletedLessonEntity {
 
     @Column("lesson_id")
     private UUID lessonId;
+
+    @Column("completed_at")
+    private Instant completedAt;
 }

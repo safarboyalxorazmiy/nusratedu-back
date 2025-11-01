@@ -1,13 +1,11 @@
-package uz.nusratedu.payment.domain.service;
+package uz.nusratedu.payment.application.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.cassandra.core.ReactiveCassandraTemplate;
 import org.springframework.data.cassandra.core.cql.ReactiveCqlOperations;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 import uz.nusratedu.payment.infrastructure.entity.card.CardEntity;
 import uz.nusratedu.payment.infrastructure.repository.CardRepository;
 import uz.nusratedu.util.payme.CardNotFoundException;

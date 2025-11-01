@@ -1,4 +1,4 @@
-package uz.nusratedu.course.domain.service;
+package uz.nusratedu.course.application.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -7,8 +7,8 @@ import reactor.core.publisher.Mono;
 import uz.nusratedu.course.application.dto.LessonCreateRequest;
 import uz.nusratedu.course.application.dto.LessonResponse;
 import uz.nusratedu.course.application.mapper.LessonMapper;
+import uz.nusratedu.course.domain.service.ILessonService;
 import uz.nusratedu.course.infrastructure.entity.CompletedLessonEntity;
-import uz.nusratedu.course.infrastructure.entity.LessonEntity;
 import uz.nusratedu.course.infrastructure.repository.CompletedLessonRepository;
 import uz.nusratedu.course.infrastructure.repository.LessonRepository;
 import uz.nusratedu.payment.infrastructure.repository.CoursePurchaseHistoryRepository;

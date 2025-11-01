@@ -1,4 +1,4 @@
-package uz.nusratedu.payment.domain.service;
+package uz.nusratedu.payment.application.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -8,8 +8,8 @@ import reactor.core.scheduler.Schedulers;
 import uz.nusratedu.payment.application.dto.PaymentMakeRequestDTO;
 import uz.nusratedu.payment.application.dto.PaymentMakeResponseDTO;
 import uz.nusratedu.payment.application.dto.PaymentVerifyRequestDTO;
+import uz.nusratedu.payment.domain.service.IPaymentSevice;
 import uz.nusratedu.payment.infrastructure.entity.CoursePurchaseHistoryEntity;
-import uz.nusratedu.payment.infrastructure.entity.card.CardEntity;
 import uz.nusratedu.payment.infrastructure.repository.CoursePurchaseHistoryRepository;
 import uz.nusratedu.util.payme.InvalidVerificationCodeException;
 import uz.nusratedu.util.payme.PaymeService;

@@ -1,13 +1,13 @@
-package uz.nusratedu.course.domain.service;
+package uz.nusratedu.course.application.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import uz.nusratedu.course.application.dto.CommentCreateRequest;
 import uz.nusratedu.course.application.dto.SectionCreateRequest;
 import uz.nusratedu.course.application.dto.SectionResponse;
 import uz.nusratedu.course.application.mapper.SectionMapper;
+import uz.nusratedu.course.domain.service.ISectionService;
 import uz.nusratedu.course.infrastructure.repository.SectionRepository;
 
 import java.util.UUID;
