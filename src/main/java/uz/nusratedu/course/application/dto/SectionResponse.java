@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @Data
@@ -17,5 +18,6 @@ public class SectionResponse {
     @JsonProperty("course_id")
     private UUID courseId;
 
-    private Integer order;
+    @JsonProperty("created_at")
+    private Instant createdAt;
 }

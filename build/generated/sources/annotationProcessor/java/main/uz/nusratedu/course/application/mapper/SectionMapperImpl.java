@@ -8,7 +8,7 @@ import uz.nusratedu.course.infrastructure.entity.SectionEntity;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-10-28T14:02:27+0500",
+    date = "2025-11-04T16:22:09+0500",
     comments = "version: 1.6.2, compiler: IncrementalProcessingEnvironment from gradle-language-java-8.14.3.jar, environment: Java 21.0.9-ea (Debian)"
 )
 @Component
@@ -25,7 +25,7 @@ public class SectionMapperImpl implements SectionMapper {
         sectionResponse.setId( entity.getId() );
         sectionResponse.setTitle( entity.getTitle() );
         sectionResponse.setCourseId( entity.getCourseId() );
-        sectionResponse.setOrder( entity.getOrder() );
+        sectionResponse.setCreatedAt( entity.getCreatedAt() );
 
         return sectionResponse;
     }
@@ -40,7 +40,6 @@ public class SectionMapperImpl implements SectionMapper {
 
         sectionEntity.title( dto.getTitle() );
         sectionEntity.courseId( dto.getCourseId() );
-        sectionEntity.order( dto.getOrder() );
 
         sectionEntity.id( com.datastax.oss.driver.api.core.uuid.Uuids.timeBased() );
 
@@ -58,7 +57,7 @@ public class SectionMapperImpl implements SectionMapper {
         sectionResponse.setId( entity.getId() );
         sectionResponse.setTitle( entity.getTitle() );
         sectionResponse.setCourseId( entity.getCourseId() );
-        sectionResponse.setOrder( entity.getOrder() );
+        sectionResponse.setCreatedAt( entity.getCreatedAt() );
 
         return sectionResponse;
     }

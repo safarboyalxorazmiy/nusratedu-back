@@ -1,10 +1,6 @@
-
-telegram:
-  bot:
-    token: 8448498911:AAGeKR1k0qMAAd1ggmnjb5bFfOUEUDOEoJA
-    username: nusratedu_bot
-
 spring:
+  profiles:
+    active: dev
   cassandra:
     contact-points:
       - 127.0.0.1
@@ -15,8 +11,7 @@ spring:
   data:
     cassandra:
       consistency-level: LOCAL_QUORUM
-  profiles:
-    active: prod
+
 logging:
   level:
     org.springframework.data.cassandra.core.cql: DEBUG
@@ -25,3 +20,8 @@ jwt:
   secret: "l7JYtEQW9BqfBMLpIQrqmxWPHZm7cZ4EjQp7U7N8A9O9vC5rDfsVtVJWr1+EylkD"
   expiration: 31536000000 # 365 day
 
+
+telegram:
+  bot:
+    token: 8448498911:AAGeKR1k0qMAAd1ggmnjb5bFfOUEUDOEoJA
+    username: nusratedu_bot

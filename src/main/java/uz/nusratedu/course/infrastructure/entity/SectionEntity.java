@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.Instant;
 import java.util.UUID;
 
 import org.springframework.data.cassandra.core.mapping.Column;
@@ -26,5 +28,7 @@ public class SectionEntity {
     @Column("course_id")
     private UUID courseId;
 
-    private Integer order;
+    @Column("created_at")
+    @Builder.Default
+    private Instant createdAt = Instant.now();
 }
