@@ -9,7 +9,7 @@ import uz.nusratedu.course.infrastructure.entity.CompletedLessonEntity;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-11-04T00:40:18+0500",
+    date = "2025-11-05T02:47:11+0500",
     comments = "version: 1.6.2, compiler: IncrementalProcessingEnvironment from gradle-language-java-8.14.3.jar, environment: Java 21.0.9-ea (Debian)"
 )
 @Component

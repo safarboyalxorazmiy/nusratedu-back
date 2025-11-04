@@ -8,8 +8,10 @@ import uz.nusratedu.course.application.dto.SectionCreateRequest;
 import uz.nusratedu.course.application.dto.SectionResponse;
 import uz.nusratedu.course.application.mapper.SectionMapper;
 import uz.nusratedu.course.domain.service.ISectionService;
+import uz.nusratedu.course.infrastructure.entity.SectionEntity;
 import uz.nusratedu.course.infrastructure.repository.SectionRepository;
 
+import java.util.Comparator;
 import java.util.UUID;
 
 @Service
@@ -26,7 +28,9 @@ public class SectionService implements ISectionService {
 
     @Override
     public Flux<SectionResponse> getByCourseId(UUID courseId) {
-        return sectionRepository.findByCourseId(courseId).map(sectionMapper::toResponse);
+        return sectionRepository.findByCourseId(courseId)
+                .sort(Comparator.comparing(SectionEntity::getId))
+                .map(sectionMapper::toResponse);
     }
 
 

@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: dev
+    active: prod
   cassandra:
     contact-points:
       - 127.0.0.1

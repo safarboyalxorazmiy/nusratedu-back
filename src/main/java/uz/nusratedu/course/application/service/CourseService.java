@@ -9,10 +9,12 @@ import uz.nusratedu.course.application.dto.CourseResponse;
 import uz.nusratedu.course.application.mapper.CourseMapper;
 import uz.nusratedu.course.domain.service.ICourseService;
 import uz.nusratedu.course.infrastructure.entity.CourseEntity;
+import uz.nusratedu.course.infrastructure.entity.SectionEntity;
 import uz.nusratedu.course.infrastructure.repository.CourseRepository;
 import uz.nusratedu.payment.infrastructure.repository.CoursePurchaseHistoryRepository;
 import uz.nusratedu.user.User;
 
+import java.util.Comparator;
 import java.util.UUID;
 
 @Service
@@ -50,7 +52,8 @@ public class CourseService implements ICourseService {
                                     }
                                     return resp;
                                 })
-                );
+
+                ).sort(Comparator.comparing(CourseResponse::getId).reversed());
     }
 
 
@@ -68,7 +71,6 @@ public class CourseService implements ICourseService {
                             });
                 });
     }
-
 
 
 }
