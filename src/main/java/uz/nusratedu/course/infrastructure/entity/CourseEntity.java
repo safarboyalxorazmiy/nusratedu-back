@@ -42,4 +42,7 @@ public class CourseEntity {
     @Column("course_description_lg")
     private String courseDescriptionLg;
 
+    @Column("price")
+    @Builder.Default
+    private Long price = 250_000L;
 }

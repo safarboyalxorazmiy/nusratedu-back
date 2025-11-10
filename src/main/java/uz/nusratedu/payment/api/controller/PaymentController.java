@@ -10,9 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
-import uz.nusratedu.payment.application.dto.PaymentMakeRequestDTO;
-import uz.nusratedu.payment.application.dto.PaymentMakeResponseDTO;
-import uz.nusratedu.payment.application.dto.PaymentVerifyRequestDTO;
+import uz.nusratedu.payment.application.dto.*;
 import uz.nusratedu.payment.domain.service.IPaymentSevice;
 import uz.nusratedu.user.User;
 
@@ -37,8 +35,20 @@ public class PaymentController {
         return ResponseEntity.ok(paymentService.make(dto, user.getTelegramId()));
     }
 
+    @PostMapping("/make/gift")
+    public ResponseEntity<Mono<PaymentMakeResponseDTO>> makeGiftPayment(
+            @RequestBody PaymentMakeGiftRequestDTO dto,
+            Authentication authentication
+    ) {
+        var user = (User) authentication.getPrincipal();
+
+        log.info("/payment/make, Request: {}", dto);
+
+        return ResponseEntity.ok(paymentService.makeGiftPayment(dto, user.getTelegramId()));
+    }
+
     @PostMapping("/verify")
-    public Mono<ResponseEntity<Void>> make(
+    public Mono<ResponseEntity<Void>> verifyPayment(
             @RequestBody PaymentVerifyRequestDTO dto,
             Authentication authentication
     ) {
@@ -47,6 +57,23 @@ public class PaymentController {
         log.info("/payment/verify, Request: {}", dto);
 
         return paymentService.verify(dto, user.getTelegramId())
+                .then(Mono.just(ResponseEntity.status(201).<Void>build()))
+                .onErrorResume(e -> {
+                    log.error("Payment verify failed: {}", e.getMessage());
+                    return Mono.just(ResponseEntity.badRequest().build());
+                });
+    }
+
+    @PostMapping("/verify/gift")
+    public Mono<ResponseEntity<Void>> verifyGiftPayment(
+            @RequestBody PaymentVerifyGiftRequestDTO dto,
+            Authentication authentication
+    ) {
+        var user = (User) authentication.getPrincipal();
+
+        log.info("/payment/verify, Request: {}", dto);
+
+        return paymentService.verifyGiftPayment(dto, user.getTelegramId())
                 .then(Mono.just(ResponseEntity.status(201).<Void>build()))
                 .onErrorResume(e -> {
                     log.error("Payment verify failed: {}", e.getMessage());
