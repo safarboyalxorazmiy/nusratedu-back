@@ -13,13 +13,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-/**
- * ✅ CONVERTED: CommentService from reactive to blocking
- *
- * All Mono<> and Flux<> removed.
- * Replaced with simple blocking repository calls.
- * Virtual threads handle concurrency efficiently.
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -28,32 +21,23 @@ public class CommentService implements ICommentService {
     private final CommentRepository commentRepository;
     private final CommentMapper commentMapper;
 
-    // ✅ CHANGED: Returns CommentResponse instead of Mono<CommentResponse>
     @Override
     public CommentResponse create(CommentCreateRequest dto) {
-        log.debug("Creating comment");
-        // ✅ Simple blocking repository call
+        log.debug("Creating comment entity for lesson: {}", dto.getLessonId());
         var entity = commentMapper.toEntity(dto);
         var saved = commentRepository.save(entity);
+        log.info("Comment persisted with ID: {}", saved.getId());
         return commentMapper.toResponse(saved);
     }
 
-    // ✅ CHANGED: Returns List<CommentResponse> instead of Flux<CommentResponse>
     @Override
     public List<CommentResponse> getByLessonId(UUID lessonId) {
-        log.debug("Getting comments for lesson: {}", lessonId);
-        // ✅ Simple blocking repository call
-        // ✅ Assumes repository now returns List or Iterable instead of Flux
-        // If repository returns List:
-        return commentRepository.findByLessonId(lessonId)
+        log.debug("Fetching comments from repository for lesson: {}", lessonId);
+        var comments = commentRepository.findByLessonId(lessonId)
                 .stream()
                 .map(commentMapper::toResponse)
                 .collect(Collectors.toList());
-
-        // ✅ Alternative if repository still has Flux (should be updated):
-        // return Flux.fromIterable(commentRepository.findByLessonId(lessonId))
-        //     .map(commentMapper::toResponse)
-        //     .collectList()
-        //     .block();  // Block to get synchronous result
+        log.info("Retrieved {} comments for lesson: {}", comments.size(), lessonId);
+        return comments;
     }
 }

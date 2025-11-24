@@ -19,12 +19,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-/**
- * ✅ CONVERTED: LessonService from reactive to blocking
- *
- * All flatMap chains replaced with simple blocking logic.
- * Uses if/else and stream operations instead of reactive operators.
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -35,55 +29,50 @@ public class LessonService implements ILessonService {
     private final CompletedLessonRepository completedLessonRepository;
     private final CoursePurchaseHistoryRepository coursePurchaseHistoryRepository;
 
-    // ✅ CHANGED: Returns LessonResponse instead of Mono<LessonResponse>
     @Override
     public LessonResponse create(LessonCreateRequest dto) {
-        log.info("Creating lesson");
-        // ✅ Simple blocking save
+        log.info("Creating lesson: {} for section: {}", dto.getTitle(), dto.getSectionId());
         var entity = mapper.toEntity(dto);
         var saved = repository.save(entity);
+        log.debug("Lesson created with ID: {}", saved.getId());
         return mapper.toResponse(saved);
     }
 
-    // ✅ CHANGED: Returns List<LessonResponse> instead of Flux<LessonResponse>
     @Override
     public List<LessonResponse> getBySectionId(UUID sectionId) {
-        log.debug("Getting lessons for section: {}", sectionId);
-        // ✅ Simple blocking call
-        return repository.findBySectionId(sectionId)
+        log.debug("Retrieving lessons for section: {}", sectionId);
+        var lessons = repository.findBySectionId(sectionId)
                 .stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
+        log.info("Found {} lessons in section: {}", lessons.size(), sectionId);
+        return lessons;
     }
 
-    // ✅ CHANGED: Returns void instead of Mono<Void>
     @Override
     public void completeLesson(UUID lessonId, User user) {
-        log.info("Completing lesson {} for user: {}", lessonId, user.getTelegramId());
-        // ✅ Simple blocking save
+        log.info("Processing lesson completion - Lesson: {}, User: {}", lessonId, user.getTelegramId());
         CompletedLessonEntity completedLesson = new CompletedLessonEntity();
         completedLesson.setId(lessonId);
         completedLesson.setUserId(user.getTelegramId());
         completedLessonRepository.save(completedLesson);
-        log.debug("Lesson completed");
+        log.debug("Lesson {} marked as completed for user: {}", lessonId, user.getTelegramId());
     }
 
-    // ✅ CHANGED: Returns List<LessonResponse> instead of Flux<LessonResponse>
     @Override
     public List<LessonResponse> getCompletedLessons(User user) {
-        log.debug("Getting completed lessons for user: {}", user.getTelegramId());
-        // ✅ Simple blocking call - no flatMap chain
+        log.info("Fetching completed lessons for user: {}", user.getTelegramId());
 
         return completedLessonRepository.findByUserId(user.getTelegramId())
                 .stream()
                 .map(completedLessonEntity -> {
-                    // ✅ Simple blocking lookup
+                    log.trace("Looking up lesson details for ID: {}", completedLessonEntity.getLessonId());
                     Optional<?> lesson = repository.findById(completedLessonEntity.getLessonId());
 
-                    // ✅ Simple if/else to handle optional
                     if (lesson.isPresent()) {
                         return mapper.toResponse((LessonEntity) lesson.get());
                     }
+                    log.warn("Lesson not found for completed lesson ID: {}", completedLessonEntity.getLessonId());
                     return null;
                 })
                 .filter(response -> response != null)

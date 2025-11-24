@@ -12,12 +12,6 @@ import uz.nusratedu.user.SecurityUser;
 
 import java.util.List;
 
-/**
- * ✅ CONVERTED: CourseController from reactive to blocking
- *
- * All Mono<> and Flux<> removed.
- * Simple blocking calls with List<> responses.
- */
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/course")
@@ -26,44 +20,33 @@ public class CourseController {
 
     private final ICourseService service;
 
-    // ✅ CHANGED: ResponseEntity<Mono<>> → ResponseEntity<>
     @PostMapping("/create")
-    public ResponseEntity<CourseResponse> create(
-            @RequestBody CourseCreateRequest courseCreateRequest
-    ) {
-        log.info("Creating new course");
-        // ✅ Simple blocking call
+    public ResponseEntity<CourseResponse> create(@RequestBody CourseCreateRequest courseCreateRequest) {
+        log.info("Creating new course: {}", courseCreateRequest.getCourseName());
         CourseResponse response = service.create(courseCreateRequest);
+        log.debug("Course created with ID: {}", response.getId());
         return ResponseEntity.status(201).body(response);
     }
 
-    // ✅ CHANGED: ResponseEntity<Flux<>> → ResponseEntity<List<>>
     @GetMapping("/get/all")
-    public ResponseEntity<List<CourseResponse>> getAllCourses(
-            Authentication authentication
-    ) {
-        // ✅ CHANGED: Cast to SecurityUser instead of User
+    public ResponseEntity<List<CourseResponse>> getAllCourses(Authentication authentication) {
         var securityUser = (SecurityUser) authentication.getPrincipal();
         var user = securityUser.getUser();
 
-        log.info("Getting all courses for user: {}", user.getTelegramId());
-        // ✅ Simple blocking call returning List
+        log.info("Fetching all courses for user: {}", user.getTelegramId());
         List<CourseResponse> courses = service.getAllCourses(user);
+        log.debug("Found {} total courses for user: {}", courses.size(), user.getTelegramId());
         return ResponseEntity.ok(courses);
     }
 
-    // ✅ CHANGED: ResponseEntity<Flux<>> → ResponseEntity<List<>>
     @GetMapping("/get/purchased")
-    public ResponseEntity<List<CourseResponse>> getPurchased(
-            Authentication authentication
-    ) {
-        // ✅ CHANGED: Cast to SecurityUser
+    public ResponseEntity<List<CourseResponse>> getPurchased(Authentication authentication) {
         var securityUser = (SecurityUser) authentication.getPrincipal();
         var user = securityUser.getUser();
 
-        log.info("Getting purchased courses for user: {}", user.getTelegramId());
-        // ✅ Simple blocking call returning List
+        log.info("Fetching purchased courses for user: {}", user.getTelegramId());
         List<CourseResponse> courses = service.getPurchasedCourses(user);
+        log.debug("User {} has purchased {} courses", user.getTelegramId(), courses.size());
         return ResponseEntity.ok(courses);
     }
 }

@@ -11,12 +11,6 @@ import uz.nusratedu.course.domain.service.ISectionService;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * ✅ CONVERTED: SectionController from reactive to blocking
- *
- * All Mono<> and Flux<> removed.
- * Simple blocking calls with List<> responses.
- */
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/section")
@@ -25,25 +19,19 @@ public class SectionController {
 
     private final ISectionService service;
 
-    // ✅ CHANGED: ResponseEntity<Mono<>> → ResponseEntity<>
     @PostMapping("/create")
-    public ResponseEntity<SectionResponse> create(
-            @RequestBody SectionCreateRequest request
-    ) {
-        log.info("Creating new section");
-        // ✅ Simple blocking call
+    public ResponseEntity<SectionResponse> create(@RequestBody SectionCreateRequest request) {
+        log.info("Creating new section: {} for course: {}", request.getTitle(), request.getCourseId());
         SectionResponse response = service.create(request);
+        log.debug("Section created with ID: {}", response.getId());
         return ResponseEntity.status(201).body(response);
     }
 
-    // ✅ CHANGED: ResponseEntity<Flux<>> → ResponseEntity<List<>>
     @GetMapping("/get")
-    public ResponseEntity<List<SectionResponse>> getByCourseId(
-            @RequestParam UUID courseId
-    ) {
-        log.debug("Getting sections for course: {}", courseId);
-        // ✅ Simple blocking call returning List
+    public ResponseEntity<List<SectionResponse>> getByCourseId(@RequestParam UUID courseId) {
+        log.info("Fetching sections for course ID: {}", courseId);
         List<SectionResponse> sections = service.getByCourseId(courseId);
+        log.debug("Found {} sections in course: {}", sections.size(), courseId);
         return ResponseEntity.ok(sections);
     }
 }

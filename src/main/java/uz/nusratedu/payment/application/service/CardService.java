@@ -28,6 +28,7 @@ public class CardService {
     }
 
     private Long getNextOrderId() {
+        log.trace("Generating next order ID");
         try {
             cql().execute("UPDATE order_counter SET value = value + 1 WHERE id = ?", COUNTER_ID);
 
@@ -40,32 +41,36 @@ public class CardService {
             if (result != null && !result.isEmpty()) {
                 Long value = result.get(0);
                 if (value != null) {
-                    log.debug("Next orderId: {}", value);
+                    log.debug("Generated order ID: {}", value);
                     return value;
                 }
             }
         } catch (Exception e) {
-            log.error("Failed to get next orderId", e);
+            log.error("Failed to get next order ID from counter, attempting fallback", e);
         }
 
         return initializeCounterFallback();
     }
 
     private Long initializeCounterFallback() {
+        log.warn("Initializing counter fallback mechanism");
         try {
             cql().execute(
                     "INSERT INTO order_counter (id, value) VALUES (?, 1) IF NOT EXISTS",
                     COUNTER_ID
             );
-            log.info("Initialized order_counter with value=1");
+            log.info("Counter initialized with value=1");
             return 1L;
         } catch (Exception ex) {
-            log.error("Critical: Failed to initialize counter", ex);
+            log.error("Critical: Failed to initialize counter, using timestamp-based fallback", ex);
             return System.currentTimeMillis() % 100_000;
         }
     }
 
     public CardEntity createCard(String number, String expire, String userId) {
+        log.info("Creating card for user: {}, card ending: {}",
+                userId, number.substring(number.length() - 4));
+
         Long orderId = getNextOrderId();
 
         CardEntity card = CardEntity.builder()
@@ -76,32 +81,59 @@ public class CardService {
                 .build();
 
         CardEntity saved = cardRepository.save(card);
-        log.info("Card created: orderId={} cardId={} userId={}", orderId, saved.getId(), userId);
+        log.info("Card created successfully - Order ID: {}, Card ID: {}, User: {}",
+                orderId, saved.getId(), userId);
         return saved;
     }
 
     public void setToken(UUID cardId, String token) {
+        log.debug("Setting token for card: {}", cardId);
+
         CardEntity card = cardRepository.findById(cardId)
-                .orElseThrow(() -> new CardNotFoundException("Card not found: " + cardId));
+                .orElseThrow(() -> {
+                    log.error("Card not found for token update: {}", cardId);
+                    return new CardNotFoundException("Card not found: " + cardId);
+                });
 
         card.setToken(token);
         cardRepository.save(card);
+        log.info("Token set successfully for card: {}", cardId);
     }
 
     public CardEntity getCardById(UUID id) {
-        return cardRepository.findById(id).orElse(null);
+        log.debug("Fetching card by ID: {}", id);
+        CardEntity card = cardRepository.findById(id).orElse(null);
+
+        if (card != null) {
+            log.info("Card found: {}", id);
+        } else {
+            log.warn("Card not found: {}", id);
+        }
+
+        return card;
     }
 
     public CardEntity getCardByTokenAndUserId(String token, String userId) {
-        List<CardEntity> cards = cardRepository.findByToken(token);
+        log.debug("Fetching card by token and user: {}", userId);
 
-        return cards.stream()
-                .filter(card -> userId.equals(card.getUserId()))
+        List<CardEntity> cards = cardRepository.findByToken(token);
+        log.trace("Found {} cards with token", cards.size());
+
+        CardEntity card = cards.stream()
+                .filter(c -> userId.equals(c.getUserId()))
                 .max((card1, card2) -> {
                     LocalDateTime date1 = card1.getCreatedAt() != null ? card1.getCreatedAt() : LocalDateTime.MIN;
                     LocalDateTime date2 = card2.getCreatedAt() != null ? card2.getCreatedAt() : LocalDateTime.MIN;
                     return date2.compareTo(date1);
                 })
                 .orElse(null);
+
+        if (card != null) {
+            log.info("Card found for user: {}", userId);
+        } else {
+            log.warn("No card found for user: {} with given token", userId);
+        }
+
+        return card;
     }
 }

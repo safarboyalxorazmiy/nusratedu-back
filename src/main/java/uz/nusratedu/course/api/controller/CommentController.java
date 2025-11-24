@@ -11,13 +11,6 @@ import uz.nusratedu.course.domain.service.ICommentService;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * ✅ CONVERTED: CommentController from reactive to blocking
- *
- * All Flux<> and Mono<> removed.
- * Replaced with simple List<> and object returns.
- * Virtual threads handle concurrency efficiently.
- */
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/comment")
@@ -26,25 +19,19 @@ public class CommentController {
 
     private final ICommentService commentService;
 
-    // ✅ CHANGED: ResponseEntity<Mono<>> → ResponseEntity<>
     @PostMapping("/create")
-    public ResponseEntity<CommentResponse> createComment(
-            @RequestBody CommentCreateRequest request
-    ) {
-        log.info("Creating comment");
-        // ✅ Simple blocking call
+    public ResponseEntity<CommentResponse> createComment(@RequestBody CommentCreateRequest request) {
+        log.info("Creating comment for lesson: {}", request.getLessonId());
         CommentResponse response = commentService.create(request);
+        log.debug("Comment created successfully with ID: {}", response.getId());
         return ResponseEntity.status(201).body(response);
     }
 
-    // ✅ CHANGED: ResponseEntity<Flux<>> → ResponseEntity<List<>>
     @GetMapping("/get")
-    public ResponseEntity<List<CommentResponse>> getByLessonId(
-            @RequestParam UUID lessonId
-    ) {
-        log.debug("Getting comments for lesson: {}", lessonId);
-        // ✅ Simple blocking call returning List
+    public ResponseEntity<List<CommentResponse>> getByLessonId(@RequestParam UUID lessonId) {
+        log.info("Fetching comments for lesson ID: {}", lessonId);
         List<CommentResponse> comments = commentService.getByLessonId(lessonId);
+        log.debug("Retrieved {} comments for lesson: {}", comments.size(), lessonId);
         return ResponseEntity.ok(comments);
     }
 }

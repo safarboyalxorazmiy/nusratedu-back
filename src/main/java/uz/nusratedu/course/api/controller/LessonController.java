@@ -13,12 +13,6 @@ import uz.nusratedu.user.SecurityUser;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * ✅ CONVERTED: LessonController from reactive to blocking
- *
- * All Mono<> and Flux<> removed.
- * Simple blocking calls with List<> responses.
- */
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/lesson")
@@ -27,56 +21,41 @@ public class LessonController {
 
     private final ILessonService service;
 
-    // ✅ CHANGED: ResponseEntity<Mono<>> → ResponseEntity<>
     @PostMapping("/create")
-    public ResponseEntity<LessonResponse> create(
-            @RequestBody LessonCreateRequest request
-    ) {
-        log.info("Creating new lesson");
-        // ✅ Simple blocking call
+    public ResponseEntity<LessonResponse> create(@RequestBody LessonCreateRequest request) {
+        log.info("Creating new lesson: {} for section: {}", request.getTitle(), request.getSectionId());
         LessonResponse response = service.create(request);
+        log.debug("Lesson created with ID: {}", response.getId());
         return ResponseEntity.status(201).body(response);
     }
 
-    // ✅ CHANGED: ResponseEntity<Flux<>> → ResponseEntity<List<>>
     @GetMapping("/get")
-    public ResponseEntity<List<LessonResponse>> getBySectionId(
-            @RequestParam UUID sectionId
-    ) {
-        log.debug("Getting lessons for section: {}", sectionId);
-        // ✅ Simple blocking call returning List
+    public ResponseEntity<List<LessonResponse>> getBySectionId(@RequestParam UUID sectionId) {
+        log.info("Fetching lessons for section ID: {}", sectionId);
         List<LessonResponse> lessons = service.getBySectionId(sectionId);
+        log.debug("Found {} lessons in section: {}", lessons.size(), sectionId);
         return ResponseEntity.ok(lessons);
     }
 
-    // ✅ CHANGED: ResponseEntity<Mono<Void>> → ResponseEntity<Void>
     @PostMapping("/complete/{lessonId}")
-    public ResponseEntity<Void> complete(
-            @PathVariable UUID lessonId,
-            Authentication authentication
-    ) {
-        // ✅ CHANGED: Cast to SecurityUser
+    public ResponseEntity<Void> complete(@PathVariable UUID lessonId, Authentication authentication) {
         var securityUser = (SecurityUser) authentication.getPrincipal();
         var user = securityUser.getUser();
 
-        log.info("Marking lesson {} as completed for user: {}", lessonId, user.getTelegramId());
-        // ✅ Simple blocking call
+        log.info("User {} completing lesson: {}", user.getTelegramId(), lessonId);
         service.completeLesson(lessonId, user);
+        log.debug("Lesson {} marked as completed for user: {}", lessonId, user.getTelegramId());
         return ResponseEntity.status(201).build();
     }
 
-    // ✅ CHANGED: ResponseEntity<Flux<>> → ResponseEntity<List<>>
     @GetMapping("/get/completed")
-    public ResponseEntity<List<LessonResponse>> getCompletedLessons(
-            Authentication authentication
-    ) {
-        // ✅ CHANGED: Cast to SecurityUser
+    public ResponseEntity<List<LessonResponse>> getCompletedLessons(Authentication authentication) {
         var securityUser = (SecurityUser) authentication.getPrincipal();
         var user = securityUser.getUser();
 
-        log.info("Getting completed lessons for user: {}", user.getTelegramId());
-        // ✅ Simple blocking call returning List
+        log.info("Retrieving completed lessons for user: {}", user.getTelegramId());
         List<LessonResponse> lessons = service.getCompletedLessons(user);
+        log.debug("User {} has completed {} lessons", user.getTelegramId(), lessons.size());
         return ResponseEntity.ok(lessons);
     }
 }

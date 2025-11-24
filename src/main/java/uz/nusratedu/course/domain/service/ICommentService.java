@@ -13,10 +13,7 @@ import java.util.UUID;
  * Returns simple objects and List<> for collection operations.
  */
 public interface ICommentService {
-
-    // ✅ CHANGED: Mono<CommentResponse> → CommentResponse
     CommentResponse create(CommentCreateRequest dto);
 
-    // ✅ CHANGED: Flux<CommentResponse> → List<CommentResponse>
     List<CommentResponse> getByLessonId(UUID lessonId);
 }

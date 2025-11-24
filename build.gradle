@@ -29,19 +29,18 @@ dependencies {
 	implementation 'jakarta.annotation:jakarta.annotation-api:2.0.0'
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
-	// ✅ CHANGED: Switched from spring-boot-starter-webflux to spring-boot-starter-web
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 
-	// ✅ CHANGED: Cassandra with blocking driver (not reactive)
 	implementation 'org.springframework.boot:spring-boot-starter-data-cassandra'
 
-	// ✅ NEW: Enable virtual thread support in Tomcat
 	implementation 'org.apache.tomcat.embed:tomcat-embed-core:11.0.0'
 
-	// Security
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 
 	implementation 'org.json:json:20210307'
+
+	// https://mvnrepository.com/artifact/jakarta.validation/jakarta.validation-api
+	implementation("jakarta.validation:jakarta.validation-api:4.0.0-M1")
 
 	// JWT
 	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
@@ -52,6 +51,7 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
 }
 
 tasks.named('test') {

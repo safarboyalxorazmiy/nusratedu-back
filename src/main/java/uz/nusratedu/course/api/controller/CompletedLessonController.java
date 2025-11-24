@@ -10,12 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 import uz.nusratedu.course.application.dto.CompletedLessonCreateRequest;
 import uz.nusratedu.course.domain.service.ICompletedLessonService;
 
-/**
- * ✅ CONVERTED: CompletedLessonController from reactive to blocking
- *
- * Removed all Mono<> and reactive patterns.
- * Now returns simple ResponseEntity with blocking calls.
- */
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/completed/lesson")
@@ -24,14 +18,11 @@ public class CompletedLessonController {
 
     private final ICompletedLessonService service;
 
-    // ✅ CHANGED: Returns void directly instead of Mono<Void>
     @PostMapping("/create")
-    public ResponseEntity<Void> create(
-            @RequestBody CompletedLessonCreateRequest dto
-    ) {
-        log.info("Marking lesson as completed");
-        // ✅ Simple blocking call
+    public ResponseEntity<Void> create(@RequestBody CompletedLessonCreateRequest dto) {
+        log.info("Marking lesson as completed - Lesson ID: {}, User ID: {}", dto.getLessonId(), dto.getUserId());
         service.create(dto);
+        log.debug("Lesson completion recorded successfully");
         return ResponseEntity.status(201).build();
     }
 }

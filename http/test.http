@@ -1,0 +1,129 @@
+### ========================================================
+### NUSRAT EDU - TEST API - FULL FLOW (WORKS 100%)
+### ========================================================
+
+### 1. CREATE TEST
+POST {{baseUrl}}/api/v1/test/create
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "lessonId": "550e8400-e29b-41d4-a716-446655440000",
+  "title": "Java Fundamentals Quiz",
+  "description": "Basic Java concepts",
+  "totalQuestions": 5,
+  "passingScore": 70,
+  "maxScore": 100
+}
+
+> {%
+    client.global.set("test_id", response.body.id);
+%}
+
+### 2. CREATE QUESTIONS (Bulk)
+POST {{baseUrl}}/api/v1/test/question/create/bulk
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+[
+  {
+    "testId": "{{test_id}}",
+    "lessonId": "550e8400-e29b-41d4-a716-446655440000",
+    "questionText": "What is JVM?",
+    "questionType": "MULTIPLE_CHOICE",
+    "pointValue": 20,
+    "orderIndex": 0
+  },
+  {
+    "testId": "{{test_id}}",
+    "lessonId": "550e8400-e29b-41d4-a716-446655440000",
+    "questionText": "Which keyword is used to inherit a class?",
+    "questionType": "MULTIPLE_CHOICE",
+    "pointValue": 20,
+    "orderIndex": 1
+  }
+]
+
+> {%
+    client.global.set("q1", response.body[0].id);
+    client.global.set("q2", response.body[1].id);
+%}
+
+### 3. CREATE ANSWERS FOR Q1
+POST {{baseUrl}}/api/v1/test/answer/create/bulk
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+[
+  { "questionId": "{{q1}}", "answerText": "Java Virtual Machine", "isCorrect": true },
+  { "questionId": "{{q1}}", "answerText": "Java Visual Machine", "isCorrect": false },
+  { "questionId": "{{q1}}", "answerText": "Java Variable Machine", "isCorrect": false }
+]
+
+> {%
+    client.global.set("correct_a1", response.body[0].id);
+%}
+
+### 4. CREATE ANSWERS FOR Q2
+POST {{baseUrl}}/api/v1/test/answer/create/bulk
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+[
+  { "questionId": "{{q2}}", "answerText": "implements", "isCorrect": false },
+  { "questionId": "{{q2}}", "answerText": "extends", "isCorrect": true },
+  { "questionId": "{{q2}}", "answerText": "inherits", "isCorrect": false }
+]
+
+> {%
+    client.global.set("correct_a2", response.body[1].id);
+%}
+
+### 5. START TEST (Student)
+POST {{baseUrl}}/api/v1/test/start/{{test_id}}
+Authorization: Bearer {{authToken}}
+
+> {%
+    client.global.set("result_id", response.body.id);
+%}
+
+### 6. SUBMIT TEST (Correct Answers = Pass)
+POST {{baseUrl}}/api/v1/test/submit
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "resultId": "{{result_id}}",
+  "answers": {
+    "{{q1}}": "{{correct_a1}}",
+    "{{q2}}": "{{correct_a2}}"
+  }
+}
+
+### 7. SUBMIT TEST (Wrong Answers = Fail)
+# Uncomment to test failing
+# POST {{baseUrl}}/api/v1/test/submit
+# Content-Type: application/json
+# Authorization: Bearer {{authToken}}
+#
+# {
+#   "resultId": "{{result_id}}",
+#   "answers": {
+#     "{{q1}}": "wrong-uuid-123",
+#     "{{q2}}": "wrong-uuid-456"
+#   }
+# }
+
+### 8. GET MY RESULTS
+GET {{baseUrl}}/api/v1/test/results/user
+Authorization: Bearer {{authToken}}
+
+### 9. GET ALL RESULTS FOR THIS TEST (Admin)
+GET {{baseUrl}}/api/v1/test/results/{{test_id}}
+Authorization: Bearer {{authToken}}
+
+### Variables Set Automatically:
+# test_id      → from step 1
+# q1, q2       → questions
+# correct_a1, correct_a2 → correct answers
+# result_id    → test session

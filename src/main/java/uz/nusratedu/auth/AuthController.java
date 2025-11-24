@@ -23,8 +23,6 @@ public class AuthController {
     private final UserRepository userRepo;
     private final JwtUtil jwtUtil;
 
-    // ✅ CONVERTED: No more Mono<>, just blocking calls
-    // Virtual threads handle the blocking efficiently
     @PostMapping("/verify")
     public ResponseEntity<Map<String, String>> verify(@RequestBody Map<String, String> body) {
         log.info("===== /api/v1/auth/verify CALLED =====");
@@ -34,7 +32,6 @@ public class AuthController {
         log.debug("Code received: {}", code);
 
         try {
-            // ✅ CHANGED: Blocking call instead of Mono
             User user = userRepo.findByLoginCode(code)
                     .orElseThrow(() -> new IllegalArgumentException("Invalid or expired code"));
 
@@ -88,13 +85,11 @@ public class AuthController {
         log.debug("Admin verification for username: {}, code: {}", username, code);
 
         try {
-            // ✅ CHANGED: Blocking call instead of Mono
             User user = userRepo.findByUsernameAndLoginCode(username, code)
                     .orElseThrow(() -> new IllegalArgumentException("Invalid or expired code"));
 
             log.debug("User found: {}", user.getUsername());
 
-            // Validate code
             boolean valid = !Boolean.TRUE.equals(user.getCodeUsed())
                     && user.getCodeExpiresAt() != null
                     && user.getCodeExpiresAt().isAfter(Instant.now());
@@ -105,7 +100,6 @@ public class AuthController {
                         .body(Map.of("error", "Invalid or expired code"));
             }
 
-            // ✅ CHANGED: Simple if-else instead of reactive conditionals
             if (user.getRole() == null || !"ADMIN".equalsIgnoreCase(user.getRole().toString())) {
                 log.warn("Unauthorized role for verification: {}", user.getRole());
                 return ResponseEntity.status(403)

@@ -17,6 +17,7 @@ import uz.nusratedu.user.SecurityUser;
 @RequiredArgsConstructor
 @Slf4j
 public class PaymentController {
+
     private final IPaymentService paymentService;
 
     @PostMapping("/make")
@@ -27,9 +28,12 @@ public class PaymentController {
         var securityUser = (SecurityUser) authentication.getPrincipal();
         var user = securityUser.getUser();
 
-        log.info("/payment/make, Request: {}", dto);
+        log.info("Processing payment request for user: {}, course: {}", user.getTelegramId(), dto.getCourseId());
+        log.debug("Payment details - Card ending: {}", dto.getNumber().substring(dto.getNumber().length() - 4));
 
         PaymentMakeResponseDTO response = paymentService.make(dto, user.getTelegramId());
+
+        log.info("Payment token generated successfully for user: {}", user.getTelegramId());
         return ResponseEntity.ok(response);
     }
 
@@ -41,9 +45,13 @@ public class PaymentController {
         var securityUser = (SecurityUser) authentication.getPrincipal();
         var user = securityUser.getUser();
 
-        log.info("/payment/make/gift, Request: {}", dto);
+        log.info("Processing gift payment for user: {}, course: {}",
+                user.getTelegramId(), dto.getCourseId());
+        log.debug("Gift payment details - Card ending: {}", dto.getNumber().substring(dto.getNumber().length() - 4));
 
         PaymentMakeResponseDTO response = paymentService.makeGiftPayment(dto, user.getTelegramId());
+
+        log.info("Gift payment token generated successfully for user: {}", user.getTelegramId());
         return ResponseEntity.ok(response);
     }
 
@@ -55,13 +63,14 @@ public class PaymentController {
         var securityUser = (SecurityUser) authentication.getPrincipal();
         var user = securityUser.getUser();
 
-        log.info("/payment/verify, Request: {}", dto);
+        log.info("Verifying payment for user: {}, course: {}", user.getTelegramId(), dto.getCourseId());
 
         try {
             paymentService.verify(dto, user.getTelegramId());
+            log.info("Payment verified successfully for user: {}, course: {}", user.getTelegramId(), dto.getCourseId());
             return ResponseEntity.status(201).build();
         } catch (Exception e) {
-            log.error("Payment verify failed: {}", e.getMessage());
+            log.error("Payment verification failed for user: {}, error: {}", user.getTelegramId(), e.getMessage());
             return ResponseEntity.badRequest().build();
         }
     }
@@ -74,13 +83,17 @@ public class PaymentController {
         var securityUser = (SecurityUser) authentication.getPrincipal();
         var user = securityUser.getUser();
 
-        log.info("/payment/verify/gift, Request: {}", dto);
+        log.info("Verifying gift payment for user: {}, course: {}, count: {}",
+                user.getTelegramId(), dto.getCourseId(), dto.getCount());
 
         try {
             paymentService.verifyGiftPayment(dto, user.getTelegramId());
+            log.info("Gift payment verified successfully for user: {}, course: {}",
+                    user.getTelegramId(), dto.getCourseId());
             return ResponseEntity.status(201).build();
         } catch (Exception e) {
-            log.error("Payment verify failed: {}", e.getMessage());
+            log.error("Gift payment verification failed for user: {}, error: {}",
+                    user.getTelegramId(), e.getMessage());
             return ResponseEntity.badRequest().build();
         }
     }

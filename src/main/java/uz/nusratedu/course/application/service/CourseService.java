@@ -18,12 +18,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-/**
- * ✅ CONVERTED: CourseService from reactive to blocking
- *
- * All flatMap, map, defaultIfEmpty chains replaced with simple blocking logic.
- * Uses standard if/else and stream operations instead of reactive operators.
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -33,36 +27,31 @@ public class CourseService implements ICourseService {
     private final CourseMapper courseMapper;
     private final CoursePurchaseHistoryRepository coursePurchaseHistoryRepository;
 
-    // ✅ CHANGED: Returns CourseResponse instead of Mono<CourseResponse>
     @Override
     public CourseResponse create(CourseCreateRequest dto) {
-        log.info("Creating course");
-        // ✅ Simple blocking save
+        log.info("Initiating course creation for: {}", dto.getCourseName());
         CourseEntity entity = courseMapper.toEntity(dto);
         CourseEntity saved = courseRepository.save(entity);
+        log.debug("Course persisted with ID: {}", saved.getId());
         return courseMapper.toResponse(saved);
     }
 
-    // ✅ CHANGED: Returns List<CourseResponse> instead of Flux<CourseResponse>
     @Override
     public List<CourseResponse> getAllCourses(User user) {
-        log.debug("Getting all courses for user: {}", user.getTelegramId());
-        // ✅ Simple blocking call - no reactive chain
+        log.debug("Fetching all courses with purchase status for user: {}", user.getTelegramId());
 
         return courseRepository.findAll()
                 .stream()
                 .map(course -> {
-                    // ✅ Simple blocking lookup for purchase history
+                    log.trace("Processing course: {} for user: {}", course.getId(), user.getTelegramId());
                     Optional<?> coursePurchase = coursePurchaseHistoryRepository
                             .findByUserIdAndCourseId(user.getTelegramId(), course.getId().toString());
 
                     CourseResponse response = courseMapper.toResponse(course);
 
-                    // ✅ Simple if/else instead of reactive conditional
                     if (coursePurchase.isPresent()) {
                         response.setPurchased(true);
-                        // Note: You may need to get purchasedAt from the purchase object
-                        // response.setPurchasedAt(coursePurchase.get().getPurchasedAt());
+                        log.trace("Course {} marked as purchased", course.getId());
                     } else {
                         response.setPurchased(false);
                         response.setPurchasedAt(null);
@@ -74,27 +63,25 @@ public class CourseService implements ICourseService {
                 .collect(Collectors.toList());
     }
 
-    // ✅ CHANGED: Returns List<CourseResponse> instead of Flux<CourseResponse>
     @Override
     public List<CourseResponse> getPurchasedCourses(User user) {
-        log.debug("Getting purchased courses for user: {}", user.getTelegramId());
-        // ✅ Simple blocking call - no reactive flatMap
+        log.info("Retrieving purchased courses for user: {}", user.getTelegramId());
 
         return coursePurchaseHistoryRepository.findByUserId(user.getTelegramId())
                 .stream()
                 .map(coursePurchase -> {
                     UUID courseId = UUID.fromString(coursePurchase.getCourseId());
-                    // ✅ Simple blocking lookup
+                    log.trace("Looking up course details for ID: {}", courseId);
                     Optional<CourseEntity> course = courseRepository.findById(courseId);
 
-                    // ✅ Simple if/else to handle optional
                     if (course.isPresent()) {
                         CourseResponse response = courseMapper.toResponse(course.get());
                         response.setPurchased(true);
                         response.setPurchasedAt(coursePurchase.getPurchasedAt());
                         return response;
                     }
-                    return null; // Or throw exception if course should always exist
+                    log.warn("Course not found for ID: {} in purchase history", courseId);
+                    return null;
                 })
                 .filter(response -> response != null)
                 .collect(Collectors.toList());
