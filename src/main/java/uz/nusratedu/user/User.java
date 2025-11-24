@@ -21,6 +21,7 @@ import java.time.Instant;
 public class User {
     @PrimaryKey
     private String telegramId;
+
     private String username;
     private String firstName;
     private String lastName;
