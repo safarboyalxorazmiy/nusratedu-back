@@ -8,8 +8,8 @@ import uz.nusratedu.course.infrastructure.entity.CourseEntity;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-11-05T02:47:11+0500",
-    comments = "version: 1.6.2, compiler: IncrementalProcessingEnvironment from gradle-language-java-8.14.3.jar, environment: Java 21.0.9-ea (Debian)"
+    date = "2025-11-25T01:12:59+0500",
+    comments = "version: 1.6.2, compiler: IncrementalProcessingEnvironment from gradle-language-java-8.14.3.jar, environment: Java 21.0.9 (Debian)"
 )
 @Component
 public class CourseMapperImpl implements CourseMapper {

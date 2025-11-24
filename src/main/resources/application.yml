@@ -1,27 +1,80 @@
 spring:
+  jmx:
+    enabled: false
+
   profiles:
-    active: prod
+    active: ${SPRING_PROFILES_ACTIVE:dev}  # Use environment variable with fallback
+
+  application:
+    name: nusratedu-api
+
   cassandra:
     contact-points:
-      - 127.0.0.1
-    port: 9042
-    local-datacenter: datacenter1   # EXACT value from system.local
-    keyspace-name: nusrat
+      - ${CASSANDRA_HOST:127.0.0.1}
+    port: ${CASSANDRA_PORT:9042}
+    local-datacenter: ${CASSANDRA_DC:datacenter1}
+    keyspace-name: ${CASSANDRA_KEYSPACE:nusrat}
     schema-action: create_if_not_exists
+    connection:
+      connect-timeout: 10s
+      read-timeout: 10s
+      pool:
+        heartbeat-interval: 30s
+
   data:
     cassandra:
       consistency-level: LOCAL_QUORUM
 
-logging:
-  level:
-    org.springframework.data.cassandra.core.cql: DEBUG
+  threads:
+    virtual:
+      enabled: true
+
+server:
+  servlet:
+    context-path: /
+
+  # Error handling
+  error:
+    include-message: always
+    include-stacktrace: on_param
+    whitelabel:
+      enabled: false
+
+  # Connection settings
+  tomcat:
+    connection-timeout: 20s
+    max-connections: 8192
+    max-threads: 200
+    accept-count: 100
+    max-http-header-size: 8192
 
 jwt:
-  secret: "l7JYtEQW9BqfBMLpIQrqmxWPHZm7cZ4EjQp7U7N8A9O9vC5rDfsVtVJWr1+EylkD"
-  expiration: 31536000000 # 365 day
-
+  secret: ${JWT_SECRET:l7JYtEQW9BqfBMLpIQrqmxWPHZm7cZ4EjQp7U7N8A9O9vC5rDfsVtVJWr1+EylkD}
+  expiration: ${JWT_EXPIRATION:31536000000}  # 365 days in milliseconds
 
 telegram:
   bot:
-    token: 8448498911:AAGeKR1k0qMAAd1ggmnjb5bFfOUEUDOEoJA
-    username: nusratedu_bot
+    token: ${TELEGRAM_BOT_TOKEN:8448498911:AAGeKR1k0qMAAd1ggmnjb5bFfOUEUDOEoJA}
+    username: ${TELEGRAM_BOT_USERNAME:nusratedu_bot}
+
+logging:
+  level:
+    root: INFO
+    uz.nusratedu: ${LOG_LEVEL_APP:DEBUG}
+    org.springframework.security: ${LOG_LEVEL_SECURITY:INFO}
+    org.springframework.data.cassandra: ${LOG_LEVEL_CASSANDRA:INFO}
+    org.apache.coyote: WARN  # Reduce noise from HTTP parsing errors
+    org.apache.tomcat: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# Management endpoints for health checks
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized

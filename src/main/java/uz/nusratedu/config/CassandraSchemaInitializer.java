@@ -1,41 +1,51 @@
 package uz.nusratedu.config;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.data.cassandra.core.cql.ReactiveCqlTemplate;
+import org.springframework.data.cassandra.core.cql.CqlTemplate;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class CassandraSchemaInitializer implements ApplicationRunner {
 
-    private final ReactiveCqlTemplate cqlTemplate;
+    private final CqlTemplate cqlTemplate;
 
     @Override
     public void run(ApplicationArguments args) {
-        // users
-        cqlTemplate.execute("CREATE INDEX IF NOT EXISTS users_logincode_idx ON users (logincode);")
-                .doOnSuccess(result -> System.out.println("✅ users_logincode_idx ready."))
-                .doOnError(err -> System.err.println("⚠️ Error creating index: " + err.getMessage()))
-                .subscribe();
+        // users login code index
+        try {
+            cqlTemplate.execute("CREATE INDEX IF NOT EXISTS users_logincode_idx ON users (logincode);");
+            log.info("✅ users_logincode_idx ready.");
+        } catch (Exception ex) {
+            log.error("⚠️ Error creating users_logincode_idx: {}", ex.getMessage());
+        }
 
         // comments by lesson_id
-        cqlTemplate.execute("CREATE INDEX IF NOT EXISTS comment_lesson_id_idx ON course_section_lesson_comment (lesson_id);")
-                .doOnSuccess(result -> System.out.println("✅ comment_lesson_id_idx ready."))
-                .doOnError(err -> System.err.println("⚠️ Error creating index for comments: " + err.getMessage()))
-                .subscribe();
+        try {
+            cqlTemplate.execute("CREATE INDEX IF NOT EXISTS comment_lesson_id_idx ON course_section_lesson_comment (lesson_id);");
+            log.info("✅ comment_lesson_id_idx ready.");
+        } catch (Exception ex) {
+            log.error("⚠️ Error creating comment_lesson_id_idx: {}", ex.getMessage());
+        }
 
         // lessons by section_id
-        cqlTemplate.execute("CREATE INDEX IF NOT EXISTS lesson_section_id_idx ON course_section_lesson (section_id);")
-                .doOnSuccess(result -> System.out.println("✅ lesson_section_id_idx ready."))
-                .doOnError(err -> System.err.println("⚠️ Error creating index for lessons: " + err.getMessage()))
-                .subscribe();
+        try {
+            cqlTemplate.execute("CREATE INDEX IF NOT EXISTS lesson_section_id_idx ON course_section_lesson (section_id);");
+            log.info("✅ lesson_section_id_idx ready.");
+        } catch (Exception ex) {
+            log.error("⚠️ Error creating lesson_section_id_idx: {}", ex.getMessage());
+        }
 
         // sections by course_id
-        cqlTemplate.execute("CREATE INDEX IF NOT EXISTS section_course_id_idx ON course_section (course_id);")
-                .doOnSuccess(result -> System.out.println("✅ section_course_id_idx ready."))
-                .doOnError(err -> System.err.println("⚠️ Error creating index for sections: " + err.getMessage()))
-                .subscribe();
+        try {
+            cqlTemplate.execute("CREATE INDEX IF NOT EXISTS section_course_id_idx ON course_section (course_id);");
+            log.info("✅ section_course_id_idx ready.");
+        } catch (Exception ex) {
+            log.error("⚠️ Error creating section_course_id_idx: {}", ex.getMessage());
+        }
     }
 }

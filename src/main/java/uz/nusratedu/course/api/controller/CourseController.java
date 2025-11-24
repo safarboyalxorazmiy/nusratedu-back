@@ -5,44 +5,65 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 import uz.nusratedu.course.application.dto.CourseCreateRequest;
 import uz.nusratedu.course.application.dto.CourseResponse;
 import uz.nusratedu.course.domain.service.ICourseService;
-import uz.nusratedu.user.User;
+import uz.nusratedu.user.SecurityUser;
 
+import java.util.List;
+
+/**
+ * ✅ CONVERTED: CourseController from reactive to blocking
+ *
+ * All Mono<> and Flux<> removed.
+ * Simple blocking calls with List<> responses.
+ */
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/course")
 @RequiredArgsConstructor
 public class CourseController {
+
     private final ICourseService service;
 
+    // ✅ CHANGED: ResponseEntity<Mono<>> → ResponseEntity<>
     @PostMapping("/create")
-    public ResponseEntity<Mono<CourseResponse>> create(
+    public ResponseEntity<CourseResponse> create(
             @RequestBody CourseCreateRequest courseCreateRequest
     ) {
-        return ResponseEntity.ok(service.create(courseCreateRequest));
+        log.info("Creating new course");
+        // ✅ Simple blocking call
+        CourseResponse response = service.create(courseCreateRequest);
+        return ResponseEntity.status(201).body(response);
     }
 
+    // ✅ CHANGED: ResponseEntity<Flux<>> → ResponseEntity<List<>>
     @GetMapping("/get/all")
-    public ResponseEntity<Flux<CourseResponse>> getAllCourses(
+    public ResponseEntity<List<CourseResponse>> getAllCourses(
             Authentication authentication
     ) {
-        var user = (User) authentication.getPrincipal();
+        // ✅ CHANGED: Cast to SecurityUser instead of User
+        var securityUser = (SecurityUser) authentication.getPrincipal();
+        var user = securityUser.getUser();
 
-        log.info("/get/all, Request: ");
-        return ResponseEntity.ok(service.getAllCourses(user));
+        log.info("Getting all courses for user: {}", user.getTelegramId());
+        // ✅ Simple blocking call returning List
+        List<CourseResponse> courses = service.getAllCourses(user);
+        return ResponseEntity.ok(courses);
     }
 
+    // ✅ CHANGED: ResponseEntity<Flux<>> → ResponseEntity<List<>>
     @GetMapping("/get/purchased")
-    public ResponseEntity<Flux<CourseResponse>> getPurchased(
+    public ResponseEntity<List<CourseResponse>> getPurchased(
             Authentication authentication
     ) {
-        var user = (User) authentication.getPrincipal();
-        log.info("/get/purchased, Request: ");
+        // ✅ CHANGED: Cast to SecurityUser
+        var securityUser = (SecurityUser) authentication.getPrincipal();
+        var user = securityUser.getUser();
 
-        return ResponseEntity.ok(service.getPurchasedCourses(user));
+        log.info("Getting purchased courses for user: {}", user.getTelegramId());
+        // ✅ Simple blocking call returning List
+        List<CourseResponse> courses = service.getPurchasedCourses(user);
+        return ResponseEntity.ok(courses);
     }
 }

@@ -24,3 +24,4 @@ These additional references should also help you:
 
 * [Gradle Build Scans – insights for your project's build](https://scans.gradle.com#gradle)
 
+الحمد لله - All praise to Allah for making this easy for you!

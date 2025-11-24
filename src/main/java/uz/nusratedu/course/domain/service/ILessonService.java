@@ -1,19 +1,30 @@
 package uz.nusratedu.course.domain.service;
 
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 import uz.nusratedu.course.application.dto.LessonCreateRequest;
 import uz.nusratedu.course.application.dto.LessonResponse;
 import uz.nusratedu.user.User;
 
+import java.util.List;
 import java.util.UUID;
 
+/**
+ * ✅ CONVERTED: ILessonService from reactive to blocking
+ *
+ * All Mono<> and Flux<> removed.
+ * Returns simple objects and List<> for collection operations.
+ * Mono<Void> → void
+ */
 public interface ILessonService {
-    Mono<LessonResponse> create(LessonCreateRequest dto);
 
-    Flux<LessonResponse> getBySectionId(UUID sectionId);
+    // ✅ CHANGED: Mono<LessonResponse> → LessonResponse
+    LessonResponse create(LessonCreateRequest dto);
 
-    Mono<Void> completeLesson(UUID lessonId, User user);
+    // ✅ CHANGED: Flux<LessonResponse> → List<LessonResponse>
+    List<LessonResponse> getBySectionId(UUID sectionId);
 
-    Flux<LessonResponse> getCompletedLessons(User user);
+    // ✅ CHANGED: Mono<Void> → void
+    void completeLesson(UUID lessonId, User user);
+
+    // ✅ CHANGED: Flux<LessonResponse> → List<LessonResponse>
+    List<LessonResponse> getCompletedLessons(User user);
 }

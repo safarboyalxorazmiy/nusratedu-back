@@ -1,7 +1,36 @@
+spring:
+  config:
+    activate:
+      on-profile: prod
+
 server:
   port: 443
+  address: 0.0.0.0
+  servlet:
+    context-path: /
+
   ssl:
     enabled: true
     key-store: /etc/letsencrypt/live/xorazmiya.uz/keystore.p12
-    key-store-password: changeit
+    key-store-password: ${SSL_KEYSTORE_PASSWORD:changeit}
     key-store-type: PKCS12
+    key-alias: tomcat
+
+  # ✅ Virtual Threads Configuration
+  tomcat:
+    threads:
+      virtual:
+        enabled: true
+      max: 200  # Carrier thread pool size (platform threads for virtual thread scheduling)
+      min-spare: 10
+
+logging:
+  level:
+    root: WARN
+    uz.nusratedu: INFO
+    org.springframework.security: INFO
+
+  file:
+    name: /var/log/nusratedu/application.log
+    max-size: 10MB
+    max-history: 30

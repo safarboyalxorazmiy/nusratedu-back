@@ -6,7 +6,7 @@ plugins {
 
 group = 'uz.nusratedu'
 version = '0.0.1-SNAPSHOT'
-description = 'Demo project for Nusratedu'
+description = 'Demo project for Nusratedu with Virtual Threads'
 
 java {
 	toolchain {
@@ -18,6 +18,7 @@ repositories {
 	mavenCentral()
 	maven { url "https://jitpack.io" }
 }
+
 dependencies {
 	compileOnly "org.projectlombok:lombok:1.18.42"
 	annotationProcessor "org.projectlombok:lombok:1.18.42"
@@ -27,21 +28,31 @@ dependencies {
 
 	implementation 'jakarta.annotation:jakarta.annotation-api:2.0.0'
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
-	implementation 'org.springframework.boot:spring-boot-starter-data-cassandra-reactive'
-	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+	// ✅ CHANGED: Switched from spring-boot-starter-webflux to spring-boot-starter-web
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+
+	// ✅ CHANGED: Cassandra with blocking driver (not reactive)
+	implementation 'org.springframework.boot:spring-boot-starter-data-cassandra'
+
+	// ✅ NEW: Enable virtual thread support in Tomcat
+	implementation 'org.apache.tomcat.embed:tomcat-embed-core:11.0.0'
+
+	// Security
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 
 	implementation 'org.json:json:20210307'
 
+	// JWT
 	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
 	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
 	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 
+	// Testing
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'io.projectreactor:reactor-test'
+	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
-
 
 tasks.named('test') {
 	useJUnitPlatform()

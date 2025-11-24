@@ -2,17 +2,16 @@ package uz.nusratedu.payment.application.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.cassandra.core.ReactiveCassandraTemplate;
-import org.springframework.data.cassandra.core.cql.ReactiveCqlOperations;
+import org.springframework.data.cassandra.core.CassandraTemplate;
+import org.springframework.data.cassandra.core.cql.CqlOperations;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
 import uz.nusratedu.payment.infrastructure.entity.card.CardEntity;
 import uz.nusratedu.payment.infrastructure.repository.CardRepository;
 import uz.nusratedu.util.payme.CardNotFoundException;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
-
 
 @Slf4j
 @Service
@@ -20,88 +19,89 @@ import java.util.UUID;
 public class CardService {
 
     private final CardRepository cardRepository;
-    private final ReactiveCassandraTemplate cassandraTemplate;
+    private final CassandraTemplate cassandraTemplate;
 
     private static final String COUNTER_ID = "card_order_counter";
 
-    private ReactiveCqlOperations cql() {
-        return cassandraTemplate.getReactiveCqlOperations();
+    private CqlOperations cql() {
+        return cassandraTemplate.getCqlOperations();
     }
 
-    private Mono<Long> getNextOrderId() {
-        return cql().execute("UPDATE order_counter SET value = value + 1 WHERE id = ?", COUNTER_ID)
-                .then(
-                        cql().queryForObject(
-                                "SELECT value FROM order_counter WHERE id = ?",
-                                Long.class,
-                                COUNTER_ID
-                        )
-                )
-                .flatMap(value -> {
-                    if (value == null) {
-                        log.warn("Counter value is null, falling back to initialization");
-                        return initializeCounterFallback();
-                    }
+    private Long getNextOrderId() {
+        try {
+            cql().execute("UPDATE order_counter SET value = value + 1 WHERE id = ?", COUNTER_ID);
+
+            List<Long> result = cql().query(
+                    "SELECT value FROM order_counter WHERE id = ?",
+                    (row, rowNum) -> row.getLong("value"),
+                    COUNTER_ID
+            );
+
+            if (result != null && !result.isEmpty()) {
+                Long value = result.get(0);
+                if (value != null) {
                     log.debug("Next orderId: {}", value);
-                    return Mono.just(value);
-                })
-                .onErrorResume(e -> {
-                    log.error("Failed to get next orderId", e);
-                    return initializeCounterFallback();
-                });
+                    return value;
+                }
+            }
+        } catch (Exception e) {
+            log.error("Failed to get next orderId", e);
+        }
+
+        return initializeCounterFallback();
     }
 
-    private Mono<Long> initializeCounterFallback() {
-        return cql().execute(
-                        "INSERT INTO order_counter (id, value) VALUES (?, 1) IF NOT EXISTS",
-                        COUNTER_ID
-                )
-                .thenReturn(1L)
-                .doOnSuccess(v -> log.info("Initialized order_counter with value=1"))
-                .onErrorResume(ex -> {
-                    log.error("Critical: Failed to initialize counter", ex);
-                    return Mono.just(System.currentTimeMillis() % 100_000); // emergency fallback
-                });
+    private Long initializeCounterFallback() {
+        try {
+            cql().execute(
+                    "INSERT INTO order_counter (id, value) VALUES (?, 1) IF NOT EXISTS",
+                    COUNTER_ID
+            );
+            log.info("Initialized order_counter with value=1");
+            return 1L;
+        } catch (Exception ex) {
+            log.error("Critical: Failed to initialize counter", ex);
+            return System.currentTimeMillis() % 100_000;
+        }
     }
 
-    public Mono<CardEntity> createCard(String number, String expire, String userId) {
-        return getNextOrderId()
-                .flatMap(orderId -> {
-                    CardEntity card = CardEntity.builder()
-                            .orderId(orderId)
-                            .number(number)
-                            .expire(expire)
-                            .userId(userId)
-                            .build();
+    public CardEntity createCard(String number, String expire, String userId) {
+        Long orderId = getNextOrderId();
 
-                    return cardRepository.save(card)
-                            .doOnSuccess(saved -> log.info("Card created: orderId={} cardId={} userId={}",
-                                    orderId, saved.getId(), userId));
-                });
+        CardEntity card = CardEntity.builder()
+                .orderId(orderId)
+                .number(number)
+                .expire(expire)
+                .userId(userId)
+                .build();
+
+        CardEntity saved = cardRepository.save(card);
+        log.info("Card created: orderId={} cardId={} userId={}", orderId, saved.getId(), userId);
+        return saved;
     }
 
-    public Mono<Void> setToken(UUID cardId, String token) {
-        return cardRepository.findById(cardId)
-                .switchIfEmpty(Mono.error(new CardNotFoundException("Card not found: " + cardId)))
-                .flatMap(card -> {
-                    card.setToken(token);
-                    return cardRepository.save(card);
-                })
-                .then();
+    public void setToken(UUID cardId, String token) {
+        CardEntity card = cardRepository.findById(cardId)
+                .orElseThrow(() -> new CardNotFoundException("Card not found: " + cardId));
+
+        card.setToken(token);
+        cardRepository.save(card);
     }
 
-    public Mono<CardEntity> getCardById(UUID id) {
-        return cardRepository.findById(id);
+    public CardEntity getCardById(UUID id) {
+        return cardRepository.findById(id).orElse(null);
     }
 
-    public Mono<CardEntity> getCardByTokenAndUserId(String token, String userId) {
-        return cardRepository.findByToken(token)
+    public CardEntity getCardByTokenAndUserId(String token, String userId) {
+        List<CardEntity> cards = cardRepository.findByToken(token);
+
+        return cards.stream()
                 .filter(card -> userId.equals(card.getUserId()))
-                .sort((card1, card2) -> {
+                .max((card1, card2) -> {
                     LocalDateTime date1 = card1.getCreatedAt() != null ? card1.getCreatedAt() : LocalDateTime.MIN;
                     LocalDateTime date2 = card2.getCreatedAt() != null ? card2.getCreatedAt() : LocalDateTime.MIN;
-                    return date2.compareTo(date1); // DESC order
+                    return date2.compareTo(date1);
                 })
-                .next();
+                .orElse(null);
     }
 }

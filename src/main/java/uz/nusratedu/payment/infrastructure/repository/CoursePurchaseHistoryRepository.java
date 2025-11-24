@@ -1,19 +1,19 @@
 package uz.nusratedu.payment.infrastructure.repository;
 
 import org.springframework.data.cassandra.repository.AllowFiltering;
-import org.springframework.data.cassandra.repository.ReactiveCassandraRepository;
+import org.springframework.data.cassandra.repository.CassandraRepository;
 import org.springframework.stereotype.Repository;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import uz.nusratedu.course.infrastructure.entity.CourseEntity;
 import uz.nusratedu.payment.infrastructure.entity.CoursePurchaseHistoryEntity;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface CoursePurchaseHistoryRepository extends ReactiveCassandraRepository<CoursePurchaseHistoryEntity, UUID> {
-    @AllowFiltering
-    Mono<CoursePurchaseHistoryEntity> findByUserIdAndCourseId(String userId, String courseId);
+public interface CoursePurchaseHistoryRepository extends CassandraRepository<CoursePurchaseHistoryEntity, UUID> {
 
-    Flux<CoursePurchaseHistoryEntity> findByUserId(String telegramId);
+    @AllowFiltering
+    Optional<CoursePurchaseHistoryEntity> findByUserIdAndCourseId(String userId, String courseId);
+
+    List<CoursePurchaseHistoryEntity> findByUserId(String telegramId);
 }
