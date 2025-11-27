@@ -10,10 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
-/**
- * Custom error controller to handle various error scenarios including
- * SSL/TLS handshake attempts on non-SSL ports.
- */
 @Slf4j
 @RestController
 public class CustomErrorController implements ErrorController {
